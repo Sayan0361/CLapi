@@ -1,4 +1,6 @@
-﻿<h2>Library Test</h2>
+﻿@model List<CLapi.Models.Method>
+
+<h2>Library Test</h2>
 
 <button id="testBtn" class="btn btn-primary">
     Test jQuery + Bootstrap
@@ -8,12 +10,27 @@
     jQuery is working and Bootstrap styling is applied!
 </div>
 
+<div class="mb-3">
+    <label class="form-label">HTTP Method</label>
+
+    <select class="form-select" id="methodDropdown" name="methodId">
+        <option value="">Select Method</option>
+
+        @foreach (var method in Model)
+        {
+            <option value="@method.MethodId">
+                @method.MethodType
+            </option>
+        }
+    </select>
+</div>
+
 <script>
-$(document).ready(function(){
+    $(document).ready(function () {
 
-    $("#testBtn").click(function(){
-        $("#result").fadeIn();
+        $("#testBtn").click(function () {
+            $("#result").fadeIn();
+        });
+
     });
-
-});
 </script>

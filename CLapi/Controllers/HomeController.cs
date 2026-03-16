@@ -1,4 +1,5 @@
 ﻿using CLapi.DAL;
+using CLapi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,17 @@ namespace CLapi.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly MethodDAL methodDAL;
+
+        public HomeController()
+        {
+            methodDAL = new MethodDAL();
+        }
+
         public ActionResult Index()
         {
-            return View();
+            List<Method> methods = methodDAL.GetAllMethods();
+            return View(methods);
         }
         // Test your DB connection
         public ContentResult TestDb()
