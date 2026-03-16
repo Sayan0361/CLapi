@@ -16,10 +16,17 @@ namespace CLapi.Controllers
         // Test your DB connection
         public ContentResult TestDb()
         {
-            using (var conn = DbConnectionFactory.Create())
+            try
             {
-                conn.Open();
-                return Content("DB Connected Successfully");
+                using (var conn = DbConnectionFactory.Create())
+                {
+                    conn.Open();
+                    return Content("DB Connected Successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
             }
         }
     }
