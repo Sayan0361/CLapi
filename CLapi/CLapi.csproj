@@ -122,6 +122,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\RequestController.cs" />
     <Compile Include="DAL\DapperConn.cs" />
     <Compile Include="DAL\DbConnectionFactory.cs" />
     <Compile Include="Global.asax.cs">
@@ -172,6 +173,7 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="SP\sp_CreateTables.sql" />
     <Content Include="SP\sp_getAllMethods.sql" />
+    <Content Include="SP\sp_UpsertResponse.sql" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -188,6 +190,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Request\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
