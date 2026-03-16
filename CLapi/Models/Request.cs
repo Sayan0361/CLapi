@@ -8,7 +8,7 @@ using System.Web;
 
 namespace CLapi.Models
 {
-    public class Request
+    public class RequestModel
     {
         public int ReqId { get; set; }
         [Required(ErrorMessage = "UserId is required")]
@@ -26,7 +26,7 @@ namespace CLapi.Models
         [Range(100, 599, ErrorMessage = "Invalid HTTP Status Code")]
         public int StatusCode { get; set; }
     }
-    public class DBResponse<T>
+    public class DBResponseModel<T>
     {
         public int Success { get; set; }
         public string Message { get; set; }
@@ -43,7 +43,7 @@ namespace CLapi.DAL
         {
             _conn = new DapperConn();
         }
-        public DBResponse<int> SaveResponse(Request request)
+        public DBResponseModel<int> SaveResponse(RequestModel request)
         {
             var proc = "sp_UpsertResponse";
             var param = new DynamicParameters();
@@ -53,7 +53,7 @@ namespace CLapi.DAL
             param.Add("@Body", request.Body);
             param.Add("@Response", request.Response);
             param.Add("@StatusCode", request.StatusCode);
-            return _conn.ExecuteSingle<DBResponse<int>>(
+            return _conn.ExecuteSingle<DBResponseModel<int>>(
                 proc,
                 param
             );

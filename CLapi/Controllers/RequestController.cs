@@ -17,7 +17,7 @@ namespace CLapi.Controllers
         }
 
         [HttpPost]
-        public JsonResult SaveRequest(Request request)
+        public JsonResult SaveRequest(RequestModel request)
         {
             if (!ModelState.IsValid)
             {

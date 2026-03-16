@@ -5,7 +5,7 @@ using System.Web;
 
 namespace CLapi.Models
 {
-    public class Collection
+    public class CollectionModel
     {
         public int CollectionId { get; set; }
         public string CollectionName { get; set; }

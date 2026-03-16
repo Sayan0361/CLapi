@@ -6,7 +6,7 @@ using System.Web;
 
 namespace CLapi.Models
 {
-    public class Method
+    public class MethodModel
     {
         public int MethodId { get; set; }
         public string MethodType { get; set; }
@@ -22,10 +22,10 @@ namespace CLapi.DAL
             _conn = new DapperConn();
         }
 
-        public List<Method> GetAllMethods()
+        public List<MethodModel> GetAllMethods()
         {
             var proc = "sp_getAllMethods";
-            return _conn.ExecuteMultipleRow<Method>(
+            return _conn.ExecuteMultipleRow<MethodModel>(
                 proc,
                 null
             );

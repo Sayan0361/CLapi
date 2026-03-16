@@ -5,7 +5,7 @@ using System.Web;
 
 namespace CLapi.Models
 {
-    public class Users
+    public class UsersModel
     {
         public int UserId { get; set; }
         public string UserName { get; set; }
