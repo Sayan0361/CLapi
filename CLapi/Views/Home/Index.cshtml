@@ -1,0 +1,19 @@
+﻿<h2>Library Test</h2>
+
+<button id="testBtn" class="btn btn-primary">
+    Test jQuery + Bootstrap
+</button>
+
+<div id="result" class="alert alert-success mt-3" style="display:none;">
+    jQuery is working and Bootstrap styling is applied!
+</div>
+
+<script>
+$(document).ready(function(){
+
+    $("#testBtn").click(function(){
+        $("#result").fadeIn();
+    });
+
+});
+</script>
