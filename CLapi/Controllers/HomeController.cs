@@ -19,8 +19,9 @@ namespace CLapi.Controllers
 
         public ActionResult Index()
         {
-            List<MethodModel> methods = methodDAL.GetAllMethods();
-            return View(methods);
+            //List<MethodModel> methods = methodDAL.GetAllMethods();
+            //return View(methods);
+            return View();
         }
         // Test your DB connection
         public ContentResult TestDb()
