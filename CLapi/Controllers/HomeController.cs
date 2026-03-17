@@ -19,10 +19,14 @@ namespace CLapi.Controllers
 
         public ActionResult Index()
         {
-            //List<MethodModel> methods = methodDAL.GetAllMethods();
-            //return View(methods);
             return View();
         }
+        public JsonResult GetMethods()
+        {
+            var methods = methodDAL.GetAllMethods();
+            return Json(new { methods }, JsonRequestBehavior.AllowGet);
+        }
+
         // Test your DB connection
         public ContentResult TestDb()
         {

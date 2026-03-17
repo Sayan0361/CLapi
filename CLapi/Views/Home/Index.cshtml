@@ -514,13 +514,13 @@
             <div class="request-header">
                 <div class="section-label">Request</div>
                 <div class="url-bar">
-                    <select class="method-select m-get" id="methodSelect">
-                        <option>GET</option>
+                    <select class="method-select active" id="methodSelect" style="color: #10B981;">
+                        @*<option>GET</option>
                         <option>POST</option>
                         <option>PUT</option>
                         <option>DELETE</option>
                         <option>PATCH</option>
-                        <option>HEAD</option>
+                        <option>HEAD</option>*@
                     </select>
                     <input type="text" class="url-input"
                            placeholder="https://api.example.com/v1/endpoint"
@@ -702,9 +702,21 @@
                 HEAD: 'm-get'
             };
 
-            $methodSelect.on('change', function () {
-                $(this).attr('class', 'method-select ' + (mc[this.value] || 'm-get'));
-            });
+
+            $methodSelect.on('change', function(){
+
+                const selectedVal = $(this).val()
+                console.log(selectedVal)
+
+                let methodColor = '';
+                if(selectedVal == '2') methodColor = '#F59E0B'
+                else if(selectedVal == '1') methodColor = '#10B981'
+                else if(selectedVal == '4') methodColor = '#EF4444'
+                else methodColor = '#3B82F6'
+
+                 $(this).css('color', methodColor);
+
+            })
 
             /* ── Line numbers ── */
             function updateLines() {
@@ -840,6 +852,34 @@
                     $folder.removeClass('open').addClass('collapsed');
                 }
             });
+
+            $.ajax({
+                url: '@Url.Action("GetMethods", "Home")',
+                type:'GET',
+                data: {
+                },
+                success: function(response){
+                    console.log('S: Response: ', response.methods);
+
+                    response.methods.forEach((r)=>{
+
+                        let methodColor = '';
+                        if(r.MethodType == "POST") methodColor = '#F59E0B'
+                        else if(r.MethodType == "GET") methodColor = '#10B981'
+                        else if(r.MethodType == "DELETE") methodColor = '#EF4444'
+                        else methodColor = '#3B82F6'
+
+                        const html = `
+                            <option value=${r.MethodId} style='color: ${methodColor}'>${r.MethodType}</option>
+                        `
+                        $methodSelect.append(html)
+                    })
+                    
+                },
+                error: function(response){
+                    console.log('E: Response: ', response);
+                }
+            })
 
         });
     </script>
