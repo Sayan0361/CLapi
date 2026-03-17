@@ -2,214 +2,847 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lumina Workbench</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>CLapi Workbench</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base:        #080a0f;
+            --bg-panel:       #0d1017;
+            --bg-surface:     #111620;
+            --bg-elevated:    #161c28;
+            --border:         rgba(255,255,255,0.07);
+            --border-bright:  rgba(255,255,255,0.14);
+            --accent:         #3b82f6;
+            --accent-glow:    rgba(59,130,246,0.22);
+            --success:        #10b981;
+            --warning:        #f59e0b;
+            --danger:         #ef4444;
+            --text-primary:   #e8edf5;
+            --text-secondary: #6b7a96;
+            --text-muted:     #3d4a60;
+            --method-get:     #10b981;
+            --method-post:    #3b82f6;
+            --method-put:     #f59e0b;
+            --method-delete:  #ef4444;
+            --radius:         8px;
+            --radius-lg:      12px;
+            --titlebar-h:     48px;
+            --bottomnav-h:    56px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* ══ TITLE BAR ══════════════════════════════════════════ */
+        #titleBar {
+            height: var(--titlebar-h);
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 10px;
+            position: relative;
+            z-index: 200;
+            flex-shrink: 0;
+        }
+        .traffic-lights { display: flex; gap: 6px; align-items: center; }
+        .tl { width: 12px; height: 12px; border-radius: 50%; }
+        .tl-red    { background: #ff5f57; }
+        .tl-yellow { background: #febc2e; }
+        .tl-green  { background: #28c840; }
+        .app-name {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800; font-size: 13px;
+            letter-spacing: 0.08em; color: var(--text-primary);
+        }
+        .app-name span { color: var(--accent); }
+        .title-spacer { flex: 1; }
+        .title-badge {
+            font-size: 10px; padding: 2px 8px; border-radius: 20px;
+            background: var(--bg-elevated); border: 1px solid var(--border-bright);
+            color: var(--text-secondary);
+        }
+        #mobileSidebarBtn {
+            display: none;
+            width: 32px; height: 32px;
+            background: var(--bg-elevated); border: 1px solid var(--border-bright);
+            color: var(--text-secondary); border-radius: 6px;
+            align-items: center; justify-content: center;
+            cursor: pointer; font-size: 15px; transition: all 0.15s;
+        }
+
+        /* ══ SHELL ══════════════════════════════════════════════ */
+        .shell {
+            display: flex;
+            height: calc(100vh - var(--titlebar-h));
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ══ LEFT SIDEBAR ═══════════════════════════════════════ */
+        #collectionsPane {
+            width: 220px; min-width: 220px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            transition: width 0.25s ease, min-width 0.25s ease, opacity 0.25s ease;
+            overflow: hidden; flex-shrink: 0; z-index: 150;
+        }
+        #collectionsPane.collapsed { width: 0; min-width: 0; opacity: 0; pointer-events: none; }
+        .pane-header {
+            padding: 14px 16px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+        }
+        .pane-title {
+            font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700;
+            letter-spacing: 0.12em; color: var(--text-secondary); text-transform: uppercase;
+        }
+        .pane-action {
+            width: 24px; height: 24px; border: 1px solid var(--border-bright);
+            background: var(--bg-elevated); color: var(--text-secondary);
+            border-radius: 5px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 12px; transition: all 0.15s;
+        }
+        .pane-action:hover { color: var(--text-primary); border-color: var(--accent); }
+        .collection-list { padding: 8px; flex: 1; overflow-y: auto; }
+        .collection-item {
+            padding: 10px; border-radius: var(--radius);
+            cursor: pointer; display: flex; align-items: center;
+            gap: 8px; font-size: 12px; color: var(--text-secondary);
+            transition: all 0.15s; margin-bottom: 2px;
+        }
+        .collection-item:hover  { background: var(--bg-elevated); color: var(--text-primary); }
+        .collection-item.active { background: var(--bg-elevated); color: var(--text-primary); }
+        .method-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .col-section-label {
+            font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em;
+            text-transform: uppercase; padding: 12px 10px 6px;
+        }
+
+        /* ══ SIDEBAR TOGGLE (desktop) ═══════════════════════════ */
+        #sidebarToggle {
+            position: absolute; top: 11px; left: 232px; z-index: 160;
+            width: 28px; height: 28px; background: var(--bg-elevated);
+            border: 1px solid var(--border-bright); color: var(--text-secondary);
+            border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 13px;
+            transition: left 0.25s ease, color 0.15s, border-color 0.15s;
+        }
+        #sidebarToggle:hover { color: var(--text-primary); border-color: var(--accent); }
+        #sidebarToggle.sidebar-closed { left: 12px; }
+
+        /* ══ MAIN PANEL ═════════════════════════════════════════ */
+        #mainPanel {
+            flex: 1; min-width: 0;
+            background: var(--bg-base);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .request-header { padding: 16px 20px 0; flex-shrink: 0; }
+        .section-label {
+            font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+        }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        /* URL BAR */
+        .url-bar {
+            display: flex; align-items: center;
+            background: var(--bg-surface); border: 1px solid var(--border-bright);
+            border-radius: var(--radius-lg); overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s; margin: 0 20px;
+        }
+        .url-bar:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .method-select {
+            appearance: none; background: var(--bg-elevated);
+            border: none; border-right: 1px solid var(--border-bright);
+            font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+            letter-spacing: 0.04em; padding: 0 12px; height: 44px;
+            cursor: pointer; outline: none; min-width: 72px;
+        }
+        .method-select.m-get    { color: var(--method-get); }
+        .method-select.m-post   { color: var(--method-post); }
+        .method-select.m-put    { color: var(--method-put); }
+        .method-select.m-delete { color: var(--method-delete); }
+        .url-input {
+            flex: 1; background: transparent; border: none;
+            color: var(--text-primary); font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; padding: 0 14px; height: 44px; outline: none; min-width: 0;
+        }
+        .url-input::placeholder { color: var(--text-muted); }
+        .url-actions { display: flex; align-items: center; padding-right: 8px; gap: 4px; }
+
+        /* TABS */
+        .req-tabs {
+            display: flex; align-items: center; gap: 2px;
+            padding: 12px 20px 0; border-bottom: 1px solid var(--border);
+            overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+        }
+        .req-tabs::-webkit-scrollbar { display: none; }
+        .req-tab {
+            padding: 7px 12px; font-size: 11px; font-weight: 500;
+            letter-spacing: 0.04em; color: var(--text-secondary);
+            cursor: pointer; border-radius: 6px 6px 0 0;
+            border: 1px solid transparent; border-bottom: none;
+            margin-bottom: -1px; transition: all 0.15s;
+            background: transparent; white-space: nowrap;
+        }
+        .req-tab:hover  { color: var(--text-primary); }
+        .req-tab.active { color: var(--text-primary); background: var(--bg-surface); border-color: var(--border); border-bottom-color: var(--bg-surface); }
+        .tab-badge { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin-left: 5px; vertical-align: middle; }
+
+        /* EDITOR */
+        .body-editor-wrap {
+            flex: 1; margin: 0 20px;
+            display: flex; flex-direction: column;
+            min-height: 0; padding: 12px 0;
+        }
+        .editor-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-shrink: 0; }
+        .editor-lang {
+            font-size: 10px; color: var(--text-secondary);
+            background: var(--bg-elevated); border: 1px solid var(--border);
+            border-radius: 4px; padding: 3px 8px;
+        }
+        .editor-wrap {
+            flex: 1; min-height: 0; background: var(--bg-surface);
+            border: 1px solid var(--border-bright);
+            border-radius: var(--radius-lg); overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .editor-row { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+        .line-numbers {
+            display: flex; flex-direction: column;
+            padding: 14px 10px; border-right: 1px solid var(--border);
+            min-width: 38px; align-items: flex-end;
+            overflow: hidden; flex-shrink: 0;
+        }
+        .line-num { font-size: 11px; line-height: 21px; color: var(--text-muted); user-select: none; }
+        .code-area {
+            flex: 1; background: transparent; border: none;
+            color: var(--text-primary); font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; line-height: 21px;
+            padding: 14px; resize: none; outline: none;
+            min-width: 0; overflow: auto;
+        }
+
+        /* ACTION BAR */
+        .action-bar {
+            padding: 12px 20px; border-top: 1px solid var(--border);
+            display: flex; align-items: center; gap: 8px;
+            background: var(--bg-panel); flex-shrink: 0;
+        }
+        .btn-send {
+            display: flex; align-items: center; gap: 7px;
+            background: var(--accent); color: #fff; border: none;
+            border-radius: var(--radius); padding: 9px 18px;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 2px 12px var(--accent-glow); white-space: nowrap;
+        }
+        .btn-send:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-send:active { transform: translateY(0); }
+        .btn-outline {
+            display: flex; align-items: center; gap: 7px;
+            background: transparent; color: var(--text-secondary);
+            border: 1px solid var(--border-bright); border-radius: var(--radius);
+            padding: 9px 14px; font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .btn-outline:hover { color: var(--text-primary); border-color: var(--accent); background: var(--accent-glow); }
+        .btn-icon {
+            width: 36px; height: 36px; background: transparent;
+            border: 1px solid var(--border-bright); border-radius: var(--radius);
+            color: var(--text-secondary); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; font-size: 14px; flex-shrink: 0;
+        }
+        .btn-icon:hover { color: var(--text-primary); border-color: var(--accent); background: var(--accent-glow); }
+        .action-spacer { flex: 1; }
+        .kbd {
+            font-size: 9px; padding: 2px 5px; border-radius: 4px;
+            background: rgba(255,255,255,0.07); border: 1px solid var(--border-bright); color: var(--text-muted);
+        }
+        .status-pill { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-secondary); }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 6px rgba(16,185,129,0.5); }
+
+        /* ══ RESPONSE INSPECTOR ═════════════════════════════════ */
+        #responseInspector {
+            width: 400px; min-width: 300px; max-width: 800px;
+            background: var(--bg-panel);
+            display: flex; flex-direction: column;
+            position: relative; border-left: 1px solid var(--border); flex-shrink: 0;
+        }
+        #dragHandle {
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 4px; cursor: ew-resize; transition: background 0.15s;
+        }
+        #dragHandle:hover { background: var(--accent); }
+        .resp-header {
+            padding: 14px 16px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+        }
+        .resp-title {
+            font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary);
+        }
+        .resp-tabs {
+            display: flex; gap: 4px; padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+        }
+        .resp-tabs::-webkit-scrollbar { display: none; }
+        .resp-tab {
+            padding: 5px 12px; font-size: 11px; color: var(--text-secondary);
+            border-radius: 5px; cursor: pointer; transition: all 0.15s;
+            background: transparent; border: 1px solid transparent; white-space: nowrap;
+        }
+        .resp-tab:hover  { color: var(--text-primary); }
+        .resp-tab.active { color: var(--text-primary); background: var(--bg-elevated); border-color: var(--border-bright); }
+        .resp-body {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 12px; color: var(--text-muted);
+            padding: 24px; overflow: auto;
+        }
+        .resp-empty-icon {
+            width: 48px; height: 48px; border: 1px dashed var(--border-bright);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .resp-empty-text { font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.7; }
+
+        /* ══ BOTTOM NAV (mobile) ════════════════════════════════ */
+        #bottomNav {
+            display: none; height: var(--bottomnav-h);
+            background: var(--bg-panel); border-top: 1px solid var(--border);
+            z-index: 200; flex-shrink: 0;
+        }
+        .bnav-tab {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 3px; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase;
+            color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+            border-top: 2px solid transparent;
+        }
+        .bnav-tab i { font-size: 19px; }
+        .bnav-tab.active { color: var(--accent); border-top-color: var(--accent); }
+
+        /* ══ OVERLAY (mobile sidebar backdrop) ══════════════════ */
+        #sidebarOverlay {
+            display: none; position: absolute; inset: 0;
+            background: rgba(0,0,0,0.6); z-index: 140;
+        }
+        #sidebarOverlay.visible { display: block; }
+
+        body.dragging { user-select: none; cursor: ew-resize; }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 4px; }
+
+        /* ══ RESPONSIVE BREAKPOINTS ═════════════════════════════ */
+
+        /* ── Tablet (≤1024px): shrink response panel ── */
+        @@media (max-width: 1024px) {
+            #responseInspector { width: 320px; min-width: 260px; }
+        }
+
+        /* ── Mobile (≤768px): stacked, overlay sidebar, bottom nav ── */
+        @@media (max-width: 768px) {
+            /* shell shrinks to leave room for bottom nav */
+            .shell { height: calc(100vh - var(--titlebar-h) - var(--bottomnav-h)); }
+
+            /* bottom nav visible */
+            #bottomNav { display: flex; }
+
+            /* mobile sidebar btn in titlebar */
+            #mobileSidebarBtn { display: flex; }
+
+            /* desktop toggle hidden */
+            #sidebarToggle { display: none; }
+
+            /* hide traffic lights + badge to save space */
+            .traffic-lights { display: none; }
+            .title-badge    { display: none; }
+
+            /* sidebar overlays */
+            #collectionsPane {
+                position: absolute; top: 0; left: 0; bottom: 0;
+                width: 260px !important; min-width: 260px !important;
+                opacity: 1 !important; pointer-events: auto !important;
+                box-shadow: 4px 0 24px rgba(0,0,0,0.6);
+                transition: transform 0.25s ease;
+                transform: translateX(0);
+            }
+            #collectionsPane.collapsed { transform: translateX(-100%) !important; }
+
+            /* response inspector fills full panel */
+            #responseInspector {
+                position: absolute; inset: 0;
+                width: 100% !important; max-width: 100%;
+                border-left: none; display: none;
+            }
+            #responseInspector.mobile-visible { display: flex; }
+
+            /* drag handle irrelevant on mobile */
+            #dragHandle { display: none; }
+
+            /* hide secondary action-bar items */
+            .action-bar-extra { display: none !important; }
+            .kbd { display: none; }
+
+            /* hide url extra buttons */
+            .url-actions { display: none; }
+        }
+
+        /* ── Small phone (≤480px): tighten spacing ── */
+        @@media (max-width: 480px) {
+            .request-header { padding: 12px 12px 0; }
+            .url-bar { margin: 0 12px; }
+            .req-tabs { padding: 10px 12px 0; }
+            .body-editor-wrap { margin: 0 12px; }
+            .action-bar { padding: 10px 12px; gap: 6px; }
+            .btn-send { padding: 9px 14px; }
+            .btn-outline { padding: 9px 10px; }
+            .save-label { display: none; } /* icon only on tiny screens */
+        }
+
+        .collection-folder .folder-header {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .folder-icon {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .collection-folder.collapsed .folder-icon {
+            transform: rotate(-90deg);
+        }
+
+        .folder-body {
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+        }
+
+        .collection-folder.collapsed .folder-body {
+            max-height: 0;
+        }
+
+        .collection-folder.open .folder-body {
+            max-height: 500px; /* enough for items */
+        }
+    </style>
 </head>
-<body class="bg-black text-light vh-100 overflow-hidden pt-5">
-    <div class="container-fluid h-100 p-0">
-        <div class="row h-100 g-0">
+<body>
 
-            <aside class="col-lg-3 col-md-4 col-12 border-end border-secondary border-opacity-50 p-3 d-flex flex-column overflow-auto bg-black">
+    <!-- TITLE BAR -->
+    <div id="titleBar">
+        <div class="traffic-lights">
+            <div class="tl tl-red"></div>
+            <div class="tl tl-yellow"></div>
+            <div class="tl tl-green"></div>
+        </div>
+        <div id="mobileSidebarBtn" title="Collections">
+            <i class="bi bi-layout-sidebar"></i>
+        </div>
+        <div class="app-name" style="margin-left:4px;">CL<span>api</span> Workbench</div>
+        <div class="title-spacer"></div>
+        <div class="title-badge">v1.0.0</div>
+    </div>
 
-                <div class="d-flex justify-content-between align-items-start mb-5">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="p-2 rounded bg-dark border border-secondary border-opacity-50">
-                            <i class="bi bi-activity text-primary fs-5"></i>                    
-                        </div>
-                        <div>
-                            <h6 class="mb-0 fw-bold">CLapi</h6>
-                            <small class="text-secondary">CLapi.com</small>
-                        </div>
+    <!-- SHELL -->
+    <div class="shell" id="shell">
+
+        <div id="sidebarToggle" title="Toggle sidebar">
+            <i class="bi bi-layout-sidebar"></i>
+        </div>
+
+        <div id="sidebarOverlay"></div>
+
+        <!-- LEFT SIDEBAR -->
+        <aside id="collectionsPane">
+            <div class="pane-header">
+                <span class="pane-title">Collections</span>
+                <div class="pane-action"><i class="bi bi-plus"></i></div>
+            </div>
+
+            <div class="collection-list">
+
+                <!-- Folder -->
+                <div class="collection-folder open">
+                    <div class="col-section-label folder-header">
+                        <i class="bi bi-chevron-down folder-icon"></i> Recent
                     </div>
-                    <button class="btn btn-sm text-secondary pe-0">
-                        <i class="bi bi-box-arrow-right fs-5"></i>
-                    </button>
+                    <div class="folder-body">
+                        <div class="collection-item active"><div class="method-dot" style="background:var(--method-get)"></div>Health Check</div>
+                        <div class="collection-item"><div class="method-dot" style="background:var(--method-post)"></div>Create User</div>
+                        <div class="collection-item"><div class="method-dot" style="background:var(--method-put)"></div>Update Record</div>
+                        <div class="collection-item"><div class="method-dot" style="background:var(--method-delete)"></div>Delete Item</div>
+                    </div>
                 </div>
 
-                <div class="text-uppercase text-secondary small fw-bold mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-layers"></i> COLLECTIONS
+                <!-- Folder -->
+                <div class="collection-folder open">
+                    <div class="col-section-label folder-header">
+                        <i class="bi bi-chevron-down folder-icon"></i> Saved
+                    </div>
+                    <div class="folder-body">
+                        <div class="collection-item"><div class="method-dot" style="background:var(--method-get)"></div>Auth Tokens</div>
+                        <div class="collection-item"><div class="method-dot" style="background:var(--method-post)"></div>Batch Import</div>
+                    </div>
                 </div>
 
-                <div class="accordion flex-grow-1" id="collectionsAccordion">
-                    
-                    <div class="accordion-item bg-transparent border-0 mb-2">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button bg-transparent text-light shadow-none p-2 collapsed"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collection1">
-                                <i class="bi bi-circle-fill text-secondary me-2" style="font-size: 0.4rem;"></i> Authentication
-                            </button>
-                        </h2>
-                        <div id="collection1" class="accordion-collapse collapse">
-                            <div class="accordion-body p-0 ms-4">
-                                <div class="list-group list-group-flush border-start border-secondary border-opacity-50 ps-2">
-                                    <button class="list-group-item list-group-item-action bg-transparent text-secondary border-0 p-1 small">
-                                        <i class="bi bi-clock me-1"></i> 01/01/2024
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <div class="accordion flex-grow-1" id="collectionsAccordion">
+            </div>
+        </aside>
 
-                    <div class="accordion-item bg-transparent border-0 mb-2">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button bg-transparent text-light shadow-none p-2 collapsed"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collection1">
-                                <i class="bi bi-circle-fill text-secondary me-2" style="font-size: 0.4rem;"></i> Authentication
-                            </button>
-                        </h2>
-                        <div id="collection1" class="accordion-collapse collapse">
-                            <div class="accordion-body p-0 ms-4">
-                                <div class="list-group list-group-flush border-start border-secondary border-opacity-50 ps-2">
-                                    <button class="list-group-item list-group-item-action bg-transparent text-secondary border-0 p-1 small">
-                                        <i class="bi bi-clock me-1"></i> 01/01/2024
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <!-- MAIN PANEL -->
+        <main id="mainPanel">
 
-                    <div class="accordion-item bg-transparent border-0 mb-2">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button bg-transparent text-light shadow-none p-2 collapsed"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collection2">
-                                <i class="bi bi-circle-fill text-secondary me-2" style="font-size: 0.4rem;"></i> Data Processing
-                            </button>
-                        </h2>
-                        <div id="collection2" class="accordion-collapse collapse">
-                            <div class="accordion-body p-0 ms-4">
-                                <div class="list-group list-group-flush border-start border-secondary border-opacity-50 ps-2">
-                                    <button class="list-group-item list-group-item-action bg-transparent text-secondary border-0 p-1 small">
-                                        <i class="bi bi-clock me-1"></i> 05/01/2024
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            </aside>
-
-
-            <main class="col-lg-5 col-md-8 col-12 border-end border-secondary border-opacity-50 p-4 d-flex flex-column overflow-auto" style="background-color: #0b0c10;">
-
-                <h5 class="mb-4 fw-bold"><i class="bi bi-code-slash me-2"></i> Configure tbl_Request</h5>
-
-                <div class="d-flex gap-3 mb-3">
-                    <select class="form-select w-auto bg-dark text-success fw-bold border-secondary shadow-none">
+            <div class="request-header">
+                <div class="section-label">Request</div>
+                <div class="url-bar">
+                    <select class="method-select m-get" id="methodSelect">
                         <option>GET</option>
                         <option>POST</option>
                         <option>PUT</option>
                         <option>DELETE</option>
+                        <option>PATCH</option>
+                        <option>HEAD</option>
                     </select>
-
-                    <div class="input-group">
-                        <span class="input-group-text bg-dark border-secondary border-end-0 text-secondary">
-                            <i class="bi bi-hdd-stack"></i>
-                        </span>
-                        <input type="text"
-                               class="form-control bg-dark text-light border-secondary border-start-0 shadow-none font-monospace"
-                               value="https://api.lumina.io/v1/health">
+                    <input type="text" class="url-input"
+                           placeholder="https://api.example.com/v1/endpoint"
+                           value="https://api.lumina.io/v1/health">
+                    <div class="url-actions">
+                        <div class="btn-icon" title="Copy URL" style="width:30px;height:30px;"><i class="bi bi-copy" style="font-size:11px;"></i></div>
+                        <div class="btn-icon" title="Params" style="width:30px;height:30px;"><i class="bi bi-sliders" style="font-size:11px;"></i></div>
                     </div>
                 </div>
+            </div>
 
-                <div class="d-flex justify-content-end gap-3 mb-5">
-                    <button class="btn btn-outline-secondary text-light">
-                        <i class="bi bi-floppy me-1"></i> Save to Collections
-                    </button>
-                    <button class="btn btn-primary px-4 fw-bold">
-                        <i class="bi bi-send me-1"></i> Execute
-                    </button>
+            <div class="req-tabs">
+                <div class="req-tab active">Body<span class="tab-badge"></span></div>
+                <div class="req-tab">Headers</div>
+                <div class="req-tab">Params</div>
+                <div class="req-tab">Auth</div>
+                <div class="req-tab">Pre-script</div>
+            </div>
+
+            <div class="body-editor-wrap">
+                <div class="editor-toolbar">
+                    <span class="editor-lang">JSON</span>
+                    <div style="flex:1"></div>
+                    <div class="btn-icon" title="Format" style="width:30px;height:30px;"><i class="bi bi-braces" style="font-size:11px;"></i></div>
+                    <div class="btn-icon" title="Clear" style="width:30px;height:30px;"><i class="bi bi-trash3" style="font-size:11px;"></i></div>
                 </div>
-
-                <div class="d-flex justify-content-between text-secondary mb-2 small fw-bold">
-                    <span class="text-uppercase">Request</span>
-                    <span>JSON</span>
-                </div>
-
-                <div class="d-flex flex-grow-1 border border-secondary border-opacity-50 rounded bg-dark overflow-hidden mb-3">
-                    <div class="bg-black text-secondary py-3 px-3 text-end font-monospace border-end border-secondary border-opacity-50 user-select-none d-flex flex-column gap-1 opacity-50 small">
-                        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
-                    </div>
-                    <textarea class="form-control bg-transparent text-light border-0 shadow-none font-monospace p-3 pt-3" rows="12">{
+                <div class="editor-wrap">
+                    <div class="editor-row">
+                        <div class="line-numbers" id="lineNums">
+                            <div class="line-num">1</div>
+                            <div class="line-num">2</div>
+                            <div class="line-num">3</div>
+                        </div>
+                        <textarea class="code-area" id="codeArea" spellcheck="false">{
   "ping": true
 }</textarea>
+                    </div>
                 </div>
+            </div>
 
-            </main>
-
-
-            <aside class="col-lg-4 d-none d-lg-flex flex-column p-4" style="background-color: #0b0c10;">
-
-                <h5 class="mb-5 fw-bold"><i class="bi bi-terminal me-2"></i> Response Inspector</h5>
-
-                <div class="text-secondary small fw-bold text-uppercase mb-3">Response Output</div>
-                
-                <div class="flex-grow-1 border border-secondary border-opacity-50 rounded bg-black d-flex flex-column align-items-center justify-content-center text-center p-4 mb-3">
-                    
-                    <i class="bi bi-server fs-1 text-secondary opacity-25 mb-3"></i>
-                    
-                    <h5 class="text-secondary mb-2">No Response Data</h5>
-                    
-                    <p class="text-secondary opacity-75 small px-4">
-                        Execute the request to populate the 
-                        <span class="badge bg-dark border border-secondary text-light rounded-1">response</span> 
-                        and 
-                        <span class="badge bg-dark border border-secondary text-light rounded-1">statusCode</span> 
-                        .
-                    </p>
-
+            <div class="action-bar">
+                <button class="btn-send" id="sendBtn">
+                    <i class="bi bi-send-fill"></i>
+                    Send
+                    <span class="kbd">⌘↵</span>
+                </button>
+                <button class="btn-outline" id="saveBtn">
+                    <i class="bi bi-bookmark-plus"></i>
+                    <span class="save-label">Save to Collection</span>
+                </button>
+                <div class="action-spacer"></div>
+                <div class="action-bar-extra" style="display:flex;gap:6px;align-items:center;">
+                    <div class="btn-icon" title="Environment"><i class="bi bi-globe2"></i></div>
+                    <div class="btn-icon" title="Settings"><i class="bi bi-gear"></i></div>
+                    <div class="status-pill" style="margin-left:4px;">
+                        <div class="status-dot"></div>
+                        <span>Ready</span>
+                    </div>
                 </div>
-               
-            </aside>
+            </div>
 
+        </main>
+
+        <!-- RESPONSE INSPECTOR -->
+        <aside id="responseInspector">
+            <div id="dragHandle"></div>
+            <div class="resp-header">
+                <i class="bi bi-terminal" style="font-size:14px;color:var(--text-secondary);"></i>
+                <span class="resp-title">Response</span>
+                <div style="flex:1"></div>
+                <div class="btn-icon" title="Copy" style="width:30px;height:30px;"><i class="bi bi-copy" style="font-size:11px;"></i></div>
+                <div class="btn-icon" title="Download" style="width:30px;height:30px;"><i class="bi bi-download" style="font-size:11px;"></i></div>
+            </div>
+            <div class="resp-tabs">
+                <div class="resp-tab active">Body</div>
+                <div class="resp-tab">Headers</div>
+                <div class="resp-tab">Console</div>
+                <div class="resp-tab">Timeline</div>
+            </div>
+            <div class="resp-body" id="respBody">
+                <div class="resp-empty-icon"><i class="bi bi-arrow-return-left"></i></div>
+                <div class="resp-empty-text">
+                    Hit <strong style="color:var(--text-secondary);">Send</strong> to see the response<br>
+                    <span style="font-size:10px;">or press ⌘↵</span>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+    <!-- BOTTOM NAV -->
+    <div id="bottomNav">
+        <div class="bnav-tab active" data-panel="request">
+            <i class="bi bi-code-slash"></i>Request
+        </div>
+        <div class="bnav-tab" data-panel="response">
+            <i class="bi bi-terminal"></i>Response
+        </div>
+        <div class="bnav-tab" data-panel="collections">
+            <i class="bi bi-collection"></i>Collections
         </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            const isMobile = () => window.innerWidth <= 768;
+
+            const $sidebar = $('#collectionsPane');
+            const $overlay = $('#sidebarOverlay');
+            const $deskToggle = $('#sidebarToggle');
+            const $mobToggle = $('#mobileSidebarBtn');
+            const $mainPanel = $('#mainPanel');
+            const $inspector = $('#responseInspector');
+            const $codeArea = $('#codeArea');
+            const $lineNums = $('#lineNums');
+            const $methodSelect = $('#methodSelect');
+            const $dragHandle = $('#dragHandle');
+            const $bnavTabs = $('.bnav-tab');
+
+            /* ── Sidebar ── */
+            function openSidebar() {
+                $sidebar.removeClass('collapsed');
+                if (isMobile()) $overlay.addClass('visible');
+                else $deskToggle.removeClass('sidebar-closed');
+            }
+
+            function closeSidebar() {
+                $sidebar.addClass('collapsed');
+                $overlay.removeClass('visible');
+                if (!isMobile()) $deskToggle.addClass('sidebar-closed');
+            }
+
+            function toggleSidebar() {
+                $sidebar.hasClass('collapsed') ? openSidebar() : closeSidebar();
+            }
+
+            $deskToggle.on('click', toggleSidebar);
+            $mobToggle.on('click', toggleSidebar);
+            $overlay.on('click', closeSidebar);
+
+            /* ── Collection items ── */
+            $(document).on('click', '.collection-item', function () {
+                $('.collection-item').removeClass('active');
+                $(this).addClass('active');
+                if (isMobile()) closeSidebar();
+            });
+
+            /* ── Bottom Nav ── */
+            $bnavTabs.on('click', function () {
+                $bnavTabs.removeClass('active');
+                $(this).addClass('active');
+
+                const panel = $(this).data('panel');
+
+                if (panel === 'collections') {
+                    openSidebar();
+                    return;
+                }
+
+                closeSidebar();
+
+                if (panel === 'request') {
+                    $mainPanel.css('display', 'flex');
+                    $inspector.removeClass('mobile-visible');
+                } else {
+                    $mainPanel.css('display', 'none');
+                    $inspector.addClass('mobile-visible');
+                }
+            });
+
+            /* ── Method colour ── */
+            const mc = {
+                GET: 'm-get',
+                POST: 'm-post',
+                PUT: 'm-put',
+                DELETE: 'm-delete',
+                PATCH: 'm-put',
+                HEAD: 'm-get'
+            };
+
+            $methodSelect.on('change', function () {
+                $(this).attr('class', 'method-select ' + (mc[this.value] || 'm-get'));
+            });
+
+            /* ── Line numbers ── */
+            function updateLines() {
+                const n = $codeArea.val().split('\n').length;
+                let html = '';
+                for (let i = 1; i <= n; i++) {
+                    html += `<div class="line-num">${i}</div>`;
+                }
+                $lineNums.html(html);
+            }
+
+            $codeArea.on('input', updateLines);
+
+            $codeArea.on('scroll', function () {
+                $lineNums.scrollTop($(this).scrollTop());
+            });
+
+            updateLines();
+
+            /* ── Drag resize (desktop) ── */
+            let dragging = false;
+
+            $dragHandle.on('mousedown', function () {
+                dragging = true;
+                $('body').addClass('dragging');
+            });
+
+            $(document).on('mousemove', function (e) {
+                if (!dragging) return;
+
+                const w = window.innerWidth - e.clientX;
+                if (w > 260 && w < 800) {
+                    $inspector.css('width', w + 'px');
+                }
+            });
+
+            $(document).on('mouseup', function () {
+                dragging = false;
+                $('body').removeClass('dragging');
+            });
+
+            /* ── Tabs ── */
+            $('.req-tab').on('click', function () {
+                $('.req-tab').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            $('.resp-tab').on('click', function () {
+                $('.resp-tab').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            /* ── Send ── */
+            function doSend() {
+                $('#respBody').html(`
+                <div style="width:100%;height:100%;padding:16px;overflow:auto;align-self:flex-start;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                        <span style="font-size:11px;font-weight:600;color:#10b981;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:5px;padding:3px 10px;">200 OK</span>
+                        <span style="font-size:10px;color:var(--text-muted);">124ms · 312B</span>
+                    </div>
+                    <pre style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#a8d8b0;line-height:1.7;white-space:pre-wrap;word-break:break-all;">{
+      <span style="color:#6b9de8;">"status"</span>: <span style="color:#f9c74f;">"ok"</span>,
+      <span style="color:#6b9de8;">"version"</span>: <span style="color:#f9c74f;">"1.0.0"</span>,
+      <span style="color:#6b9de8;">"timestamp"</span>: <span style="color:#f9c74f;">"${new Date().toISOString()}"</span>,
+      <span style="color:#6b9de8;">"ping"</span>: <span style="color:#f0846a;">true</span>
+}</pre>
+                </div>
+            `);
+
+                if (isMobile()) {
+                    $bnavTabs.removeClass('active');
+                    $('[data-panel="response"]').addClass('active');
+                    $mainPanel.css('display', 'none');
+                    $inspector.addClass('mobile-visible');
+                }
+            }
+
+            $('#sendBtn').on('click', doSend);
+
+            $(document).on('keydown', function (e) {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                    doSend();
+                }
+            });
+
+            /* ── Save ── */
+            $('#saveBtn').on('click', function () {
+                const url = $('.url-input').val();
+                const name = url.split('/').pop() || 'New Request';
+                const method = $methodSelect.val();
+
+                const $item = $(`
+                <div class="collection-item">
+                    <div class="method-dot" style="background:var(--method-${method.toLowerCase()})"></div>
+                    ${name}
+                </div>
+            `);
+
+                $('.collection-list').append($item);
+
+                $(this)
+                    .css({
+                        background: 'rgba(16,185,129,0.15)',
+                        borderColor: '#10b981',
+                        color: '#10b981'
+                    })
+                    .html('<i class="bi bi-check2"></i> Saved!');
+
+                setTimeout(() => {
+                    $(this)
+                        .attr('style', '')
+                        .html('<i class="bi bi-bookmark-plus"></i><span class="save-label"> Save to Collection</span>');
+                }, 1500);
+            });
+
+            /* ── Resize reset ── */
+            $(window).on('resize', function () {
+                if (!isMobile()) {
+                    $mainPanel.css('display', 'flex');
+                    $inspector.removeClass('mobile-visible');
+                    $overlay.removeClass('visible');
+                }
+            });
+
+
+            /* ── Accordion (Collections) ── */
+            $(document).on('click', '.folder-header', function () {
+                const $folder = $(this).parent();
+
+                if ($folder.hasClass('collapsed')) {
+                    $folder.removeClass('collapsed').addClass('open');
+                } else {
+                    $folder.removeClass('open').addClass('collapsed');
+                }
+            });
+
+        });
+    </script>
+
 </body>
 </html>
-
-@*show for the collections*@
-
-@*<div class="accordion" id="collectionsAccordion">
-
-        @foreach (var collection in Model)
-        {
-            <div class="accordion-item">
-
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#col_@collection.Id">
-                        @collection.Name
-                    </button>
-                </h2>
-
-                <div id="col_@collection.Id"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="#collectionsAccordion">
-
-                    <div class="accordion-body">
-
-                        @foreach (var request in collection.Requests)
-                        {
-                            <div class="p-2 border-bottom">
-                                @request.RequestName
-                            </div>
-                        }
-
-                    </div>
-
-                </div>
-
-            </div>
-        }
-
-    </div>*@
