@@ -35,9 +35,10 @@ BEGIN
 		c.collectionName,
 		r.reqId,
 		r.requestName,
+		r.methodId,
+		m.methodType,
 		r.requestURL,
-		r.statusCode,
-		m.methodType
+		r.body
 	FROM tbl_Collections c
 	LEFT JOIN tbl_CollectionRequests cr 
 		ON c.collectionId = cr.collectionId
@@ -48,3 +49,5 @@ BEGIN
 	WHERE c.userId = @userId
 	ORDER BY c.collectionName ASC;
 END
+
+EXEC sp_GetAllCollectionsRequestsByUserID @userId = 1;

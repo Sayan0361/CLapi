@@ -219,6 +219,7 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="SP\InsertTestData.sql" />
+    <Content Include="SP\sp_AddOrEditCollection.sql" />
     <Content Include="SP\sp_CreateTables.sql" />
     <Content Include="SP\sp_GetAllCollectionsRequestsByUserID.sql" />
     <Content Include="SP\sp_getAllMethods.sql" />
