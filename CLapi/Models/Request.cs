@@ -18,7 +18,7 @@ namespace CLapi.Models
 
         [Required(ErrorMessage = "Method is required")]
         [Range(1, 4, ErrorMessage = "Invalid MethodId")]
-        public int MethodId { get; set; }
+        public int MethodId { get; set; } = 1;
 
         [Required(ErrorMessage = "Collection is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Invalid CollectionId")]
