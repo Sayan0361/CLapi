@@ -52,6 +52,26 @@
                             </div>
                         </div>
                     </div>
+                <div class="accordion flex-grow-1" id="collectionsAccordion">
+
+                    <div class="accordion-item bg-transparent border-0 mb-2">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-transparent text-light shadow-none p-2 collapsed"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collection1">
+                                <i class="bi bi-circle-fill text-secondary me-2" style="font-size: 0.4rem;"></i> Authentication
+                            </button>
+                        </h2>
+                        <div id="collection1" class="accordion-collapse collapse">
+                            <div class="accordion-body p-0 ms-4">
+                                <div class="list-group list-group-flush border-start border-secondary border-opacity-50 ps-2">
+                                    <button class="list-group-item list-group-item-action bg-transparent text-secondary border-0 p-1 small">
+                                        <i class="bi bi-clock me-1"></i> 01/01/2024
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="accordion-item bg-transparent border-0 mb-2">
                         <h2 class="accordion-header">
@@ -160,36 +180,36 @@
 
 @*<div class="accordion" id="collectionsAccordion">
 
-    @foreach (var collection in Model)
-    {
-        <div class="accordion-item">
+        @foreach (var collection in Model)
+        {
+            <div class="accordion-item">
 
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#col_@collection.Id">
-                    @collection.Name
-                </button>
-            </h2>
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#col_@collection.Id">
+                        @collection.Name
+                    </button>
+                </h2>
 
-            <div id="col_@collection.Id"
-                 class="accordion-collapse collapse"
-                 data-bs-parent="#collectionsAccordion">
+                <div id="col_@collection.Id"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#collectionsAccordion">
 
-                <div class="accordion-body">
+                    <div class="accordion-body">
 
-                    @foreach (var request in collection.Requests)
-                    {
-                        <div class="p-2 border-bottom">
-                            @request.RequestName
-                        </div>
-                    }
+                        @foreach (var request in collection.Requests)
+                        {
+                            <div class="p-2 border-bottom">
+                                @request.RequestName
+                            </div>
+                        }
+
+                    </div>
 
                 </div>
 
             </div>
+        }
 
-        </div>
-    }
-
-</div>*@
+    </div>*@
