@@ -34,7 +34,7 @@ namespace CLapi.Controllers
             }
 
             RequestDAL dal = new RequestDAL();
-            var result = dal.SaveResponse(request);
+            var result = dal.SaveRequest(request);
 
             return Json(result);
         }

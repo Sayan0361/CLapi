@@ -11,18 +11,31 @@ namespace CLapi.Models
     public class RequestModel
     {
         public int ReqId { get; set; }
+
         [Required(ErrorMessage = "UserId is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Invalid UserId")]
         public int UserId { get; set; }
+
         [Required(ErrorMessage = "Method is required")]
         [Range(1, 4, ErrorMessage = "Invalid MethodId")]
         public int MethodId { get; set; }
+
+        [Required(ErrorMessage = "Collection is required")]
+        [Range(1, int.MaxValue, ErrorMessage = "Invalid CollectionId")]
+        public int CollectionId { get; set; }
+
+        [StringLength(100, ErrorMessage = "Request name too long")]
+        public string RequestName { get; set; } = "Untitled";
+
         [Required(ErrorMessage = "Request URL is required")]
         [StringLength(100, ErrorMessage = "URL cannot exceed 100 characters")]
         [Url(ErrorMessage = "Invalid URL format")]
         public string RequestURL { get; set; }
+
         public string Body { get; set; }
+
         public string Response { get; set; }
+
         [Range(100, 599, ErrorMessage = "Invalid HTTP Status Code")]
         public int StatusCode { get; set; }
     }
@@ -43,16 +56,22 @@ namespace CLapi.DAL
         {
             _conn = new DapperConn();
         }
-        public DBResponseModel<int> SaveResponse(RequestModel request)
+        public DBResponseModel<int> SaveRequest(RequestModel request)
         {
             var proc = "sp_UpsertResponse";
             var param = new DynamicParameters();
+
             param.Add("@UserId", request.UserId);
             param.Add("@MethodId", request.MethodId);
+
+            param.Add("@CollectionId", request.CollectionId);
+            param.Add("@RequestName", request.RequestName ?? "Untitled");
+
             param.Add("@RequestURL", request.RequestURL);
             param.Add("@Body", request.Body);
             param.Add("@Response", request.Response);
             param.Add("@StatusCode", request.StatusCode);
+
             return _conn.ExecuteSingle<DBResponseModel<int>>(
                 proc,
                 param

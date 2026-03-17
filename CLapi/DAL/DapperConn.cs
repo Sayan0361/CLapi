@@ -40,7 +40,11 @@ namespace CLapi.DAL
         {
             using (var conn = DbConnectionFactory.Create())
             {
-                return conn.ExecuteScalar<T>(procName, param, commandType: CommandType.StoredProcedure);
+                return conn.QueryFirstOrDefault<T>(
+                    procName,
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
             }
         }
     }
