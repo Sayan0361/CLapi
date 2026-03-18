@@ -1,5 +1,6 @@
 ﻿using CLapi.Models;
 using Dapper;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -29,7 +30,7 @@ namespace CLapi.Models
 
         [Required(ErrorMessage = "Request URL is required")]
         [StringLength(100, ErrorMessage = "URL cannot exceed 100 characters")]
-        [Url(ErrorMessage = "Invalid URL format")]
+        //[Url(ErrorMessage = "Invalid URL format")]
         public string RequestURL { get; set; }
 
         public string Body { get; set; }

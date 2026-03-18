@@ -15,6 +15,25 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
+        .key {
+            color: #6b9de8;
+        }
+
+        .string {
+            color: #f9c74f;
+        }
+
+        .number {
+            color: #f0846a;
+        }
+
+        .boolean {
+            color: #90be6d;
+        }
+
+        .null {
+            color: #999;
+        }
         :root {
             --bg-base:        #080a0f;
             --bg-panel:       #0d1017;
@@ -529,15 +548,16 @@
                 <div class="url-bar">
                     <select class="method-select active" id="methodSelect" style="color: #10B981;">
                         @*<option>GET</option>
-                        <option>POST</option>
-                        <option>PUT</option>
-                        <option>DELETE</option>
-                        <option>PATCH</option>
-                        <option>HEAD</option>*@
+                            <option>POST</option>
+                            <option>PUT</option>
+                            <option>DELETE</option>
+                            <option>PATCH</option>
+                            <option>HEAD</option>
+                                value="https://api.lumina.io/v1/health" *@
                     </select>
                     <input type="text" class="url-input"
                            placeholder="https://api.example.com/v1/endpoint"
-                           value="https://api.lumina.io/v1/health">
+                           >
                     <div class="url-actions">
                         <div class="btn-icon" title="Copy URL" style="width:30px;height:30px;"><i class="bi bi-copy" style="font-size:11px;"></i></div>
                         <div class="btn-icon" title="Params" style="width:30px;height:30px;"><i class="bi bi-sliders" style="font-size:11px;"></i></div>
@@ -567,9 +587,8 @@
                             <div class="line-num">2</div>
                             <div class="line-num">3</div>
                         </div>
-                        <textarea class="code-area" id="codeArea" spellcheck="false">{
-  "ping": true
-}</textarea>
+                        <textarea class="code-area" id="codeArea" spellcheck="false">
+                        </textarea>
                     </div>
                 </div>
             </div>
@@ -647,11 +666,14 @@
             const $mobToggle = $('#mobileSidebarBtn');
             const $mainPanel = $('#mainPanel');
             const $inspector = $('#responseInspector');
-            const $codeArea = $('#codeArea');
             const $lineNums = $('#lineNums');
             const $methodSelect = $('#methodSelect');
             const $dragHandle = $('#dragHandle');
             const $bnavTabs = $('.bnav-tab');
+            const $urlInput = $('.url-input')
+            const $reqUrl = $('.url-input')
+            const $body = $('#codeArea');
+
 
             /* ── Sidebar ── */
             function openSidebar() {
@@ -732,7 +754,7 @@
 
             /* ── Line numbers ── */
             function updateLines() {
-                const n = $codeArea.val().split('\n').length;
+                const n = $body.val().split('\n').length;
                 let html = '';
                 for (let i = 1; i <= n; i++) {
                     html += `<div class="line-num">${i}</div>`;
@@ -740,9 +762,9 @@
                 $lineNums.html(html);
             }
 
-            $codeArea.on('input', updateLines);
+            $body.on('input', updateLines);
 
-            $codeArea.on('scroll', function () {
+            $body.on('scroll', function () {
                 $lineNums.scrollTop($(this).scrollTop());
             });
 
@@ -781,22 +803,118 @@
                 $(this).addClass('active');
             });
 
+            function syntaxHighlight(json) {
+                if (typeof json !== 'string') {
+                    json = JSON.stringify(json, null, 2);
+                }
+
+                json = json
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+
+                return json.replace(
+                    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(\.\d+)?)/g,
+                    function (match) {
+                        let cls = 'number';
+
+                        if (/^"/.test(match)) {
+                            cls = /:$/.test(match) ? 'key' : 'string';
+                        } else if (/true|false/.test(match)) {
+                            cls = 'boolean';
+                        } else if (/null/.test(match)) {
+                            cls = 'null';
+                        }
+
+                        return `<span class="${cls}">${match}</span>`;
+                    }
+                );
+            }
+
+            function getStatusText(code) {
+                const map = {
+                    200: "OK",
+                    201: "Created",
+                    400: "Bad Request",
+                    401: "Unauthorized",
+                    403: "Forbidden",
+                    404: "Not Found",
+                    500: "Internal Server Error"
+                };
+
+                return map[code] || "Unknown";
+            }
             /* ── Send ── */
             function doSend() {
-                $('#respBody').html(`
-                <div style="width:100%;height:100%;padding:16px;overflow:auto;align-self:flex-start;">
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                        <span style="font-size:11px;font-weight:600;color:#10b981;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:5px;padding:3px 10px;">200 OK</span>
-                        <span style="font-size:10px;color:var(--text-muted);">124ms · 312B</span>
-                    </div>
-                    <pre style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#a8d8b0;line-height:1.7;white-space:pre-wrap;word-break:break-all;">{
-      <span style="color:#6b9de8;">"status"</span>: <span style="color:#f9c74f;">"ok"</span>,
-      <span style="color:#6b9de8;">"version"</span>: <span style="color:#f9c74f;">"1.0.0"</span>,
-      <span style="color:#6b9de8;">"timestamp"</span>: <span style="color:#f9c74f;">"${new Date().toISOString()}"</span>,
-      <span style="color:#6b9de8;">"ping"</span>: <span style="color:#f0846a;">true</span>
-}</pre>
-                </div>
-            `);
+
+                $.ajax({
+                    url: '@Url.Action("SendPostRequest", "Request")',
+                    type: 'POST',
+                    data: {
+                        RequestURL: $reqUrl.val(),
+                        Body: $body.val(),
+                        MethodId: parseInt($methodSelect.val()),
+                        UserId: 2,
+                        CollectionId: 1,
+                        StatusCode: 200
+                    },
+                    success: function (response) {
+                        console.log("S-Response: ", response);
+
+                        const parsedData = JSON.parse(response.Body);
+                        console.log("ParsedData: ", parsedData);
+
+                        console.log("$body.val(): ", $body.val());
+                        console.log("$reqUrl.val(): ", $reqUrl.val());
+
+
+                        //let parsedData = response; // already parsed (your current case)
+
+                        let status = parsedData.statusCode || 200;
+
+                        // Decide color + label
+                        let statusText = getStatusText(status);
+                        let color = "#10b981"; // green
+
+                        if (status >= 400) {
+                            color = "#ef4444"; // red
+                            statusText = "ERROR";
+                        } else if (status >= 300) {
+                            color = "#f59e0b"; // yellow
+                            statusText = "REDIRECT";
+                        }
+
+                        $('#respBody').html(`
+                            <div style="width:100%;height:100%;padding:16px;overflow:auto;">
+    
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                                    <span style="
+                                        font-size:11px;
+                                        font-weight:600;
+                                        color:${color};
+                                        background:rgba(0,0,0,0.2);
+                                        border:1px solid ${color};
+                                        border-radius:5px;
+                                        padding:3px 10px;">
+                                        ${status} ${statusText}
+                                    </span>
+                                </div>
+
+                                <pre style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;">${syntaxHighlight(parsedData)}</pre>
+
+                            </div>
+                        `);
+
+                    },
+                    error: function (response) {
+                        console.log("E-Response: ", response);
+
+                    }
+                })
+
+
+
+                
 
                 if (isMobile()) {
                     $bnavTabs.removeClass('active');
