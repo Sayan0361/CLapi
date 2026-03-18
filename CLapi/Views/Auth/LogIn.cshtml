@@ -5,11 +5,37 @@
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
+    @*<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">*@
     <style>
         .custom-placeholder::placeholder {
             color: #bbbbbb !important;
             opacity: 1 !important;
+        }
+
+        * {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+        }
+
+        .app-name span {
+            color: var(--accent);
+        }
+
+        .title-spacer {
+            flex: 1;
+        }
+
+        .title-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-bright);
+            color: var(--text-secondary);
         }
     </style>
 </head>
@@ -71,3 +97,67 @@
         </section>
     </main>
 </body>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<script>
+    $(document).ready(function () {
+
+        $('#toggle-password').click(function () {
+            // Toggle the eye icon class
+            $(this).toggleClass('fa-eye fa-eye-slash');
+
+            // Get the input field
+            var input = $('#Password');
+
+            // Toggle the input type attribute
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+            } else {
+                input.attr('type', 'password');
+            }
+        });
+
+        $('#LoginBtn').on('click', function (e) {
+            var data = {
+                Email: $("#Email").val().trim(),
+                HashedPassword: $("#Password").val().trim()
+            };
+            $.ajax({
+                url: '@Url.Action("LogIn", "Auth")',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+
+                    if (response.success) {
+                        console.log(response)
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message,
+                            confirmButtonColor: '#5b5ce2'
+                        }).then(() => {
+                            localStorage.setItem('UserId', response.data.UserId);
+                            localStorage.setItem('UserName', response.data.UserName);
+                            window.location.href = '@Url.Action("/", "Home")';
+                        });
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Warning',
+                            text: response.MESSAGE,
+                            confirmButtonColor: '#dc3545'
+                        })
+                    }
+                },
+                error: function (response) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        text: 'Something went wrong. Please try again.',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            });
+        });
+    })
+</script>

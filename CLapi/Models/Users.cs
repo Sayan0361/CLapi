@@ -10,12 +10,13 @@ namespace CLapi.Models
 {
     public class UsersModel
     {
+        public int SUCCESS { get; set; }
+        public string MESSAGE { get; set; }
         public int UserId { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
         public string HashedPassword { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DbResponse  DbResponse { get; set; }
     }
 
     public class DbResponse
@@ -54,7 +55,7 @@ namespace CLapi.DAL
             try
             {
                 DapperConn conn = new DapperConn();
-                return conn.ExecuteSingle<UsersModel>("sp_LogIn", param);
+                return conn.ExecuteSingleRow<UsersModel>("sp_LogIn", param);
 
             }catch(SqlException ex)
             {

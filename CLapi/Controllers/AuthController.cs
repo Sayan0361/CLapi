@@ -1,6 +1,7 @@
 ﻿using CLapi.DAL;
 using CLapi.Models;
 using Dapper;
+using Microsoft.Ajax.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,9 +21,9 @@ namespace CLapi.Controllers
         }
 
         [HttpPost]
-        public JsonResult SignUp(UsersModel model)
+        public JsonResult SignUp(string FullName, string Email, string Password)
         {
-            if(model == null)
+            if(FullName == "" || Email == "" || Password == "")
             {
                 return Json(
                     new
@@ -37,11 +38,10 @@ namespace CLapi.Controllers
             }
 
             DynamicParameters param = new DynamicParameters();
+            string PasswordHash = BCrypt.Net.BCrypt.HashPassword(Password);
 
-            string PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.HashedPassword);
-
-            param.Add("@userName", model.UserName);
-            param.Add("@email", model.Email);
+            param.Add("@userName",FullName);
+            param.Add("@email",Email);
             param.Add("@hashedPassword", PasswordHash);
 
             UsersDAL user = new UsersDAL();
@@ -125,13 +125,13 @@ namespace CLapi.Controllers
                 var result = user.LogIn(param);
 
                 // Email not found
-                if (result.DbResponse.SUCCESS == 0)
+                if (result.SUCCESS == 0)
                 {
                     return Json(new
                     {
                         success = false,
                         statusCode = 404,
-                        message = result.DbResponse.MESSAGE,
+                        message = result.MESSAGE,
                         data = new { },
                         error = ""
                     });

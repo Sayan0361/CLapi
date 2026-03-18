@@ -5,11 +5,36 @@
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         .custom-placeholder::placeholder {
             color: #bbbbbb !important;
             opacity: 1 !important;
+        }
+        * {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+        }
+
+        .app-name span {
+            color: var(--accent);
+        }
+
+        .title-spacer {
+            flex: 1;
+        }
+
+        .title-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-bright);
+            color: var(--text-secondary);
         }
     </style>
 </head>
@@ -35,7 +60,7 @@
                         <span class="input-group-text bg-dark text-primary border-secondary">
                             <i class="bi bi-person-circle"></i>
                         </span>
-                        <input type="text" class="form-control form-control-lg px-2 bg-dark text-white border-secondary custom-placeholder"
+                        <input type="text" required class="form-control form-control-lg px-2 bg-dark text-white border-secondary custom-placeholder"
                                placeholder="Sayan Sen" id="Name">
                     </div>
                 </div>
@@ -52,10 +77,10 @@
 
                 <div class="mb-3">
                     <div class="input-group px-5">
-                        <span class="input-group-text bg-dark text-primary border-secondary">
+                        <span class="input-group-text bg-dark text-primary border-secondary" r>
                             <i class="bi bi-lock"></i>
                         </span>
-                        <input type="password" class="form-control form-control-lg px-2 bg-dark text-white border-secondary custom-placeholder"
+                        <input type="password" required class="form-control form-control-lg px-2 bg-dark text-white border-secondary custom-placeholder"
                                placeholder="Enter password" id="Password" />
                         <span class="input-group-text bg-dark text-white border-secondary" style="cursor:pointer;" id="toggle-password">
                             <i class="bi bi-eye-slash"></i>
@@ -69,7 +94,7 @@
                             <i class="bi bi-check-all"></i>
                         </span>
                         <input type="password" class="form-control form-control-lg px-2 bg-dark text-white border-secondary custom-placeholder"
-                               placeholder="Confirm password" id="ConfirmPassword" />
+                               placeholder="Confirm password" id="ConfirmPassword" required/>
                         <span class="input-group-text bg-dark text-white border-secondary" style="cursor:pointer;" id="toggle-confirm-password">
                             <i class="bi bi-eye-slash"></i>
                         </span>
@@ -77,7 +102,7 @@
                 </div>
 
                 <div class="px-5 pb-3">
-                    <button class="btn btn-primary w-100 py-2 fw-semibold" id="RegisterBtn" type="button">
+                    <button class="btn btn-primary w-100 py-2 fw-semibold" id="signupBtn" type="button">
                         Sign Up
                     </button>
                 </div>
@@ -92,3 +117,97 @@
         </section>
     </main>
 </body>
+
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<script>
+    $(document).ready(function () {
+
+        $('#toggle-password').click(function () {
+            // Toggle the eye icon class
+            $(this).toggleClass('fa-eye fa-eye-slash');
+
+            // Get the input field
+            var input = $('#Password');
+
+            // Toggle the input type attribute
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+            } else {
+                input.attr('type', 'password');
+            }
+        });
+        $('#toggle-confirm-password').click(function () {
+            // Toggle the eye icon class
+            $(this).toggleClass('fa-eye fa-eye-slash');
+
+            // Get the input field
+            var input = $('#ConfirmPassword');
+
+            // Toggle the input type attribute
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+            } else {
+                input.attr('type', 'password');
+            }
+        });
+
+        $('#signupBtn').on('click', function (e) {
+            var FullName = $("#Name").val().trim();
+            var Email = $("#Email").val().trim();
+            var Password = $("#Password").val().trim();
+            var ConfirmPassword = $("#ConfirmPassword").val().trim();
+            if (Password != ConfirmPassword) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning',
+                    text: 'Password Mismatch',
+                    confirmButtonColor: '#dc3545'
+                })
+                return 
+            }
+            $.ajax({
+                url: '@Url.Action("SignUp", "Auth")',
+                type: 'POST',
+                data: {
+                    FullName,
+                    Email,
+                    Password,
+                },
+                success: function (response) {
+                    console.log(response);
+
+                    if (response.success) {
+
+                        var userId = response.Data.id;
+                        var userName = response.Data.UserName;
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.Message,
+                            confirmButtonColor: '#5b5ce2'
+                        }).then(() => {
+                            window.location.href = '@Url.Action("LogIn","Auth")';
+                        });
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Warning',
+                            text: response.Message,
+                            confirmButtonColor: '#dc3545'
+                        })
+                    }
+                },
+                error: function (response) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        text: 'Something went wrong. Please try again.',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            });
+        });
+    })
+</script>
