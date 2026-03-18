@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@model CLapi.Models.Collection_MessageModel
+
+@{var groupedData = Model.collections.GroupBy(x => x.collectionName);}
+
+
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -481,31 +487,38 @@
 
             <div class="collection-list">
 
-                <!-- Folder -->
-                <div class="collection-folder open">
-                    <div class="col-section-label folder-header">
-                        <i class="bi bi-chevron-down folder-icon"></i> Recent
-                    </div>
-                    <div class="folder-body">
-                        <div class="collection-item active"><div class="method-dot" style="background:var(--method-get)"></div>Health Check</div>
-                        <div class="collection-item"><div class="method-dot" style="background:var(--method-post)"></div>Create User</div>
-                        <div class="collection-item"><div class="method-dot" style="background:var(--method-put)"></div>Update Record</div>
-                        <div class="collection-item"><div class="method-dot" style="background:var(--method-delete)"></div>Delete Item</div>
-                    </div>
-                </div>
+                @foreach (var col in groupedData)
+                {
+                    <div class="collection-folder open">
 
-                <!-- Folder -->
-                <div class="collection-folder open">
-                    <div class="col-section-label folder-header">
-                        <i class="bi bi-chevron-down folder-icon"></i> Saved
+                        <div class="col-section-label folder-header">
+                            <i class="bi bi-chevron-down folder-icon"></i> @col.Key
+                        </div>
+
+                        <div class="folder-body">
+                            @foreach (var req in col)
+                            {
+                                <div class="collection-item">
+
+                                    <div class="method-dot"
+                                         style="background:
+                                @(req.methodType == "GET" ? "var(--method-get)" :
+                                  req.methodType == "POST" ? "var(--method-post)" :
+                                  req.methodType == "PUT" ? "var(--method-put)" :
+                                  "var(--method-delete)")">
+                                    </div>
+
+                                    @req.requestName
+
+                                </div>
+                            }
+                        </div>
+
                     </div>
-                    <div class="folder-body">
-                        <div class="collection-item"><div class="method-dot" style="background:var(--method-get)"></div>Auth Tokens</div>
-                        <div class="collection-item"><div class="method-dot" style="background:var(--method-post)"></div>Batch Import</div>
-                    </div>
-                </div>
+                }
 
             </div>
+
         </aside>
 
         <!-- MAIN PANEL -->
@@ -625,8 +638,7 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-        $(document).ready(function () {
-
+        $(document).ready(function () { 
             const isMobile = () => window.innerWidth <= 768;
 
             const $sidebar = $('#collectionsPane');

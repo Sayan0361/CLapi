@@ -19,7 +19,10 @@ namespace CLapi.Controllers
 
         public ActionResult Index()
         {
-            return View();
+            CollectionDAL dal = new CollectionDAL();
+
+            var details = dal.getDetails(1);
+            return View(details);
         }
         public JsonResult GetMethods()
         {
