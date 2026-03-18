@@ -38,7 +38,7 @@ namespace CLapi.DAL
         {
             _conn = new DapperConn();
         }
-        public DBResponseModel<int> addOrEditCollection(int collectionId = 0, string collectionName, int userId)
+        public DBResponseModel<int> addOrEditCollection(string collectionName, int userId, int collectionId = 0)
         {
             var proc = "sp_AddOrEditCollection";
 

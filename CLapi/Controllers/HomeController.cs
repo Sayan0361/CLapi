@@ -31,12 +31,12 @@ namespace CLapi.Controllers
             return Json(new { methods }, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public JsonResult AddOrEditCollection(int collectionId = 0, string collectionName, int userId)
+        public JsonResult AddOrEditCollection(int collectionId, string collectionName, int userId)
         {
             var dbResponse = collectionDAL.addOrEditCollection(
-                    collectionId,
                     collectionName,
-                    userId
+                    userId,
+                    collectionId
                 );
             return Json(
                 dbResponse,
