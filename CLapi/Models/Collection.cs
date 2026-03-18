@@ -38,6 +38,20 @@ namespace CLapi.DAL
         {
             _conn = new DapperConn();
         }
+        public DBResponseModel<int> addOrEditCollection(int collectionId = 0, string collectionName, int userId)
+        {
+            var proc = "sp_AddOrEditCollection";
+
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("@collectionId", collectionId);
+            parameters.Add("@collectionName", collectionName);
+            parameters.Add("@userId", userId);
+
+            return _conn.ExecuteSingle<DBResponseModel<int>>(
+                proc,
+                parameters
+            );
+        }
         public Collection_MessageModel getDetails(int userId)
         {
             var proc = "sp_GetAllCollectionsRequestsByUserID";

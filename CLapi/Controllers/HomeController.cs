@@ -11,10 +11,11 @@ namespace CLapi.Controllers
     public class HomeController : Controller
     {
         private readonly MethodDAL methodDAL;
-
+        private readonly CollectionDAL collectionDAL;
         public HomeController()
         {
             methodDAL = new MethodDAL();
+            collectionDAL = new CollectionDAL();
         }
 
         public ActionResult Index()
@@ -29,7 +30,19 @@ namespace CLapi.Controllers
             var methods = methodDAL.GetAllMethods();
             return Json(new { methods }, JsonRequestBehavior.AllowGet);
         }
-
+        [HttpPost]
+        public JsonResult AddOrEditCollection(int collectionId = 0, string collectionName, int userId)
+        {
+            var dbResponse = collectionDAL.addOrEditCollection(
+                    collectionId,
+                    collectionName,
+                    userId
+                );
+            return Json(
+                dbResponse,
+                JsonRequestBehavior.AllowGet
+            );
+        }
         // Test your DB connection
         public ContentResult TestDb()
         {
