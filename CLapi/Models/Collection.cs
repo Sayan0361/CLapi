@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Web;
 using CLapi.Models;
@@ -17,7 +18,9 @@ namespace CLapi.Models
         public string requestName { get; set; }
         public string requestURL { get; set; }
         public int statusCode { get; set; }
+        public int methodId { get; set; }
         public string methodType { get; set; }
+        public string body { get; set; }
     }
 
     public class Collection_MessageModel
