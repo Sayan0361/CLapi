@@ -121,6 +121,15 @@
                 Email: $("#Email").val().trim(),
                 HashedPassword: $("#Password").val().trim()
             };
+            if (!data.Email || !data.HashedPassword) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Fields',
+                    text: 'Email and Password are required!',
+                    confirmButtonColor: '#dc3545'
+                });
+                return; // stop execution
+            }
             $.ajax({
                 url: '@Url.Action("LogIn", "Auth")',
                 type: 'POST',
@@ -146,7 +155,7 @@
                         Swal.fire({
                             icon: 'warning',
                             title: 'Warning',
-                            text: response.MESSAGE,
+                            text: response.message,
                             confirmButtonColor: '#dc3545'
                         })
                     }
