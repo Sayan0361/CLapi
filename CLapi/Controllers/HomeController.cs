@@ -18,13 +18,19 @@ namespace CLapi.Controllers
             collectionDAL = new CollectionDAL();
         }
 
-        public ActionResult Index()
+        public ActionResult Index(int? id)
         {
-            CollectionDAL dal = new CollectionDAL();
+            if (id == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
 
-            var details = dal.getDetails(1);
+            CollectionDAL dal = new CollectionDAL();
+            var details = dal.getDetails(id.Value);
+
             return View(details);
         }
+
         public JsonResult GetMethods()
         {
             var methods = methodDAL.GetAllMethods();

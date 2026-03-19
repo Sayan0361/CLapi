@@ -137,7 +137,9 @@
                         }).then(() => {
                             localStorage.setItem('UserId', response.data.UserId);
                             localStorage.setItem('UserName', response.data.UserName);
-                            window.location.href = '@Url.Action("/", "Home")';
+                            const userid = response.data.UserId;
+                            let baseURL = '@Url.Action("Index","Home", new {id = 0})'
+                            window.location.href = baseURL.replace(0, userid);
                         });
                     }
                     else {

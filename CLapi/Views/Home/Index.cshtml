@@ -86,8 +86,12 @@
                         </div>
 
                     </div>
+
                 }
 
+            </div>
+            <div class="d-flex ms-auto text-danger p-3">
+                    <i class="bi bi-box-arrow-right" id="logout_btn"></i>
             </div>
 
         </aside>
@@ -199,6 +203,34 @@
         $(document).ready(function () {
             var data = @Html.Raw(Json.Encode(Model));
             var collections = data.collections;
+            let userId = parseInt(localStorage.getItem("UserId"));
+           $.ajax({
+            url: '@Url.Action("Index", "Home")',
+            type: 'GET',
+            data: { UserId: userId },
+            success: function (res) {
+                console.log(res);
+            }
+        });
+
+            $("#logout_btn").hover(
+                function () {
+                    $(this).css({
+                        "opacity": "0.7",
+                        "transform": "scale(1.1)"
+                    });
+                },
+                function () {
+                    $(this).css({
+                        "opacity": "1",
+                        "transform": "scale(1)"
+                    });
+                }
+            );
+            $("#logout_btn").on('click',function(){
+                localStorage.clear();
+                window.location.href = '@Url.Action("LogIn","Auth")';
+            })
 
             /* ── Monaco Editor ── */
             let editor;
@@ -479,7 +511,7 @@
                             const parsed = JSON.parse(xhr.responseText);
 
                             display = syntaxHighlight(JSON.stringify(parsed, null, 2));
-                        } 
+                        }
                         catch {
                             // If NOT JSON (HTML or plain text)
                             let raw = xhr.responseText || '';
@@ -494,7 +526,7 @@
 
                         $('#respBody').html(`
                             <div style="width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;">
-            
+
                                 <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
                                     <span style="
                                         font-size:11px;
