@@ -1,6 +1,6 @@
 USE [CLapiDB]
 GO
-/****** Object:  StoredProcedure [dbo].[sp_CreateTables]    Script Date: 3/17/2026 12:01:46 PM ******/
+/****** Object:  StoredProcedure [dbo].[sp_CreateTables]    Script Date: 3/19/2026 2:31:26 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -50,7 +50,7 @@ BEGIN
         userId INT,
         methodId INT,
         requestName VARCHAR(100),
-        requestURL VARCHAR(100),
+        requestURL NVARCHAR(MAX),
         body VARCHAR(MAX),
         response VARCHAR(MAX),
         statusCode INT,

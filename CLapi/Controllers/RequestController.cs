@@ -26,15 +26,12 @@ namespace CLapi.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-
-                return Json(new
+                return Json(new DBResponseModel<object>
                 {
                     Success = 0,
-                    Message = string.Join(", ", errors)
+                    Message = string.Join(", ",
+                        ModelState.Values.SelectMany(v => v.Errors)
+                                         .Select(e => e.ErrorMessage))
                 });
             }
 

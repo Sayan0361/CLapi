@@ -29,16 +29,35 @@ namespace CLapi.Models
         public string RequestName { get; set; } = "Untitled";
 
         [Required(ErrorMessage = "Request URL is required")]
-        [StringLength(100, ErrorMessage = "URL cannot exceed 100 characters")]
         //[Url(ErrorMessage = "Invalid URL format")]
         public string RequestURL { get; set; }
 
         public string Body { get; set; }
 
+        [JsonIgnore]
         public string Response { get; set; }
 
         [Range(100, 599, ErrorMessage = "Invalid HTTP Status Code")]
-        public int StatusCode { get; set; }
+        public int? StatusCode { get; set; }
+
+        public string GetRequestName()
+        {
+            return string.IsNullOrWhiteSpace(RequestName) ? "New Request" : RequestName;
+        }
+
+        public bool IsValidJson()
+        {
+            if (string.IsNullOrWhiteSpace(Body)) return true;
+            try
+            {
+                JsonConvert.DeserializeObject(Body);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
     public class DBResponseModel<T>
     {
@@ -66,7 +85,7 @@ namespace CLapi.DAL
             param.Add("@MethodId", request.MethodId);
 
             param.Add("@CollectionId", request.CollectionId);
-            param.Add("@RequestName", request.RequestName ?? "Untitled");
+            param.Add("@RequestName", request.GetRequestName());
 
             param.Add("@RequestURL", request.RequestURL);
             param.Add("@Body", request.Body);

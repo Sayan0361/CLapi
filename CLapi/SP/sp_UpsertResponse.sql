@@ -1,10 +1,17 @@
-﻿ALTER PROC [dbo].[sp_UpsertResponse]
+﻿USE [CLapiDB]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_UpsertResponse]    Script Date: 3/19/2026 2:34:34 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROC [dbo].[sp_UpsertResponse]
 (
     @userId INT,
     @methodId INT,
     @collectionId INT, 
-    @requestName VARCHAR(100) = 'Untitled',
-    @requestURL VARCHAR(100),
+    @requestName VARCHAR(100) = 'New Request',
+    @requestURL NVARCHAR(MAX),
     @body VARCHAR(MAX),
     @response VARCHAR(MAX),
     @statusCode INT
@@ -20,7 +27,9 @@ BEGIN
             SELECT 1 FROM dbo.tbl_Users WHERE userId = @userId
         )
         BEGIN
-            SELECT 0, 'User not found. Please signup and login.', NULL;
+            SELECT 0 AS Success,
+			'User not found. Please signup and login.' AS Message,
+			NULL AS Data;
             RETURN;
         END
 
@@ -30,7 +39,9 @@ BEGIN
             WHERE collectionId = @collectionId AND userId = @userId
         )
         BEGIN
-            SELECT 0, 'Invalid collection.', NULL;
+            SELECT 0 AS Success,
+			'Invalid collection.' AS Message, 
+			NULL AS Data;
             RETURN;
         END
 
