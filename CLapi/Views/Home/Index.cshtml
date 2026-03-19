@@ -202,10 +202,10 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         $(document).ready(function () {
-
             var data = @Html.Raw(Json.Encode(Model));
             console.log(data);
             var collections = data.collections;
+
 
             $('.request-item').on('click', function () {
                 var url = $(this).data("url");
@@ -226,9 +226,31 @@
                 $("#methodSelect").val(methodid);
                 $("#methodSelect").css('color', methodColor);
                 $(".url-input").val(url);
-                $(".code-area").val(JSON.stringify(body, null, 2));
+                let parsed = body;
 
+                // Handle empty cases FIRST
+                if (!parsed || parsed === "" || parsed === "null") {
+                    $("#codeArea").val("");
+                    updateLines();
+                    return;
+                }
 
+                // Try parsing if string
+                if (typeof parsed === "string") {
+                    try {
+                        parsed = JSON.parse(parsed);
+                    } catch {
+                        // If not valid JSON, just show raw string
+                        $("#codeArea").val(parsed);
+                        updateLines();
+                        return;
+                    }
+                }
+
+                // Normal JSON case
+                $("#codeArea").val(JSON.stringify(parsed, null, 2));
+                updateLines();
+               
             })
 
             const isMobile = () => window.innerWidth <= 768;
@@ -246,7 +268,6 @@
             const $urlInput = $('.url-input')
             const $reqUrl = $('.url-input')
             const $body = $('#codeArea');
-
 
             /* ── Sidebar ── */
             function openSidebar() {
@@ -331,6 +352,25 @@
             });
 
             updateLines();
+
+            /* Prettier JSON code */
+            $body.on('blur', function () {
+                try {
+                    let formatted = JSON.stringify(JSON.parse($body.val()), null, 2);
+                    $body.val(formatted);
+                    updateLines();
+                } catch {}
+            });
+
+            $('.bi-braces').parent().on('click', function () {
+                try {
+                    let formatted = JSON.stringify(JSON.parse($body.val()), null, 2);
+                    $body.val(formatted);
+                    updateLines();
+                } catch {
+                    alert("Invalid JSON");
+                }
+            });
 
             /* ── Drag resize (desktop) ── */
             let dragging = false;
@@ -430,7 +470,7 @@
                         console.log("$reqUrl.val(): ", $reqUrl.val());
 
 
-                        //let parsedData = response; // already parsed (your current case)
+                        //let parsedData = response;
 
                         let status = parsedData.statusCode || 200;
 
@@ -470,13 +510,8 @@
                     },
                     error: function (response) {
                         console.log("E-Response: ", response);
-
                     }
                 })
-
-
-
-
 
                 if (isMobile()) {
                     $bnavTabs.removeClass('active');
@@ -501,11 +536,11 @@
                 const method = $methodSelect.val();
 
                 const $item = $(`
-                <div class="collection-item">
-                    <div class="method-dot" style="background:var(--method-${method.toLowerCase()})"></div>
-                    ${name}
-                </div>
-            `);
+                                    <div class="collection-item">
+                                        <div class="method-dot" style="background:var(--method-${method.toLowerCase()})"></div>
+                                        ${name}
+                                    </div>
+                                `);
 
                 $('.collection-list').append($item);
 
@@ -532,7 +567,6 @@
                     $overlay.removeClass('visible');
                 }
             });
-
 
             /* ── Accordion (Collections) ── */
             $(document).on('click', '.folder-header', function () {
