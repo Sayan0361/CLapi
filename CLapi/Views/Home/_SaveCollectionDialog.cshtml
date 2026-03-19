@@ -1,0 +1,563 @@
+﻿<!-- Backdrop -->
+<div id="saveDialogBackdrop" class="sdl-backdrop"></div>
+
+<!-- Dialog -->
+<div id="saveDialog" class="sdl-dialog" role="dialog" aria-modal="true" aria-labelledby="sdlTitle">
+
+    <!-- Glow accent (purely decorative) -->
+    <div class="sdl-glow"></div>
+
+    <!-- Header -->
+    <div class="sdl-header">
+        <div class="sdl-header-left">
+            <div class="sdl-icon-wrap">
+                <i class="bi bi-bookmark-plus"></i>
+            </div>
+            <div>
+                <div class="sdl-title" id="sdlTitle">Save Request</div>
+                <div class="sdl-subtitle">Add to an existing collection</div>
+            </div>
+        </div>
+        <button class="sdl-close" id="sdlCloseBtn" aria-label="Close dialog">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+
+    <!-- Divider -->
+    <div class="sdl-divider"></div>
+
+    <!-- Body -->
+    <div class="sdl-body">
+
+        <!-- Request name -->
+        <div class="sdl-field">
+            <label class="sdl-label" for="sdlReqName">
+                <i class="bi bi-pencil" style="font-size:10px;opacity:.6;"></i>
+                Request Name
+            </label>
+            <input id="sdlReqName"
+                   class="sdl-input"
+                   type="text"
+                   placeholder="My awesome request"
+                   autocomplete="off" />
+        </div>
+
+        <!-- Collection picker -->
+        <div class="sdl-field">
+            <label class="sdl-label" for="sdlCollectionSelect">
+                <i class="bi bi-folder2" style="font-size:10px;opacity:.6;"></i>
+                Collection
+            </label>
+            <div class="sdl-select-wrap">
+                <select id="sdlCollectionSelect" class="sdl-select">
+                    <option value="" disabled selected>Choose a collection…</option>
+                    <!-- Options injected by JS from the existing collections data -->
+                </select>
+                <i class="bi bi-chevron-down sdl-select-chevron"></i>
+            </div>
+        </div>
+
+        <!-- Inline hint -->
+        <div class="sdl-hint">
+            <i class="bi bi-info-circle"></i>
+            Select a collection, then hit <strong>Save</strong>. The request will appear immediately in the sidebar.
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="sdl-footer">
+        <button class="sdl-btn-cancel" id="sdlCancelBtn">Cancel</button>
+        <button class="sdl-btn-save" id="sdlSaveBtn">
+            <i class="bi bi-check2"></i>
+            Save
+        </button>
+    </div>
+
+</div>
+
+
+
+<style>
+
+    /* ── Variables (inherit from parent, fallback if needed) ────────── */
+    :root {
+        --sdl-bg: #0f1117;
+        --sdl-surface: #161b27;
+        --sdl-border: rgba(255,255,255,.07);
+        --sdl-border-focus: rgba(99,179,237,.45);
+        --sdl-text: #e2e8f0;
+        --sdl-text-muted: #64748b;
+        --sdl-accent: #10B981;
+        --sdl-accent-dim: rgba(16,185,129,.12);
+        --sdl-radius: 14px;
+        --sdl-font-mono: 'JetBrains Mono', monospace;
+        --sdl-font-display: 'Syne', sans-serif;
+        --sdl-shadow: 0 24px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05);
+    }
+
+    /* ── Backdrop ───────────────────────────────────────────────────── */
+    .sdl-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.65);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .22s ease;
+    }
+
+        .sdl-backdrop.sdl-visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+    /* ── Dialog shell ───────────────────────────────────────────────── */
+    .sdl-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -46%) scale(.96);
+        width: min(420px, calc(100vw - 32px));
+        background: var(--sdl-surface);
+        border: 1px solid var(--sdl-border);
+        border-radius: var(--sdl-radius);
+        box-shadow: var(--sdl-shadow);
+        z-index: 1001;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .22s ease, transform .22s cubic-bezier(.34,1.3,.64,1);
+        overflow: hidden;
+    }
+
+        .sdl-dialog.sdl-visible {
+            opacity: 1;
+            pointer-events: all;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+    /* ── Decorative glow ────────────────────────────────────────────── */
+    .sdl-glow {
+        position: absolute;
+        top: -60px;
+        right: -40px;
+        width: 180px;
+        height: 180px;
+        background: radial-gradient(circle, rgba(16,185,129,.18) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    .sdl-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 20px 16px;
+    }
+
+    .sdl-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .sdl-icon-wrap {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: var(--sdl-accent-dim);
+        border: 1px solid rgba(16,185,129,.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sdl-accent);
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+
+    .sdl-title {
+        font-family: var(--sdl-font-display);
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--sdl-text);
+        line-height: 1.2;
+    }
+
+    .sdl-subtitle {
+        font-family: var(--sdl-font-mono);
+        font-size: 10px;
+        color: var(--sdl-text-muted);
+        margin-top: 2px;
+    }
+
+    .sdl-close {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: 1px solid var(--sdl-border);
+        background: transparent;
+        color: var(--sdl-text-muted);
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background .15s, color .15s, border-color .15s;
+        line-height: 1;
+        padding: 0;
+    }
+
+        .sdl-close:hover {
+            background: rgba(239,68,68,.12);
+            border-color: rgba(239,68,68,.3);
+            color: #ef4444;
+        }
+
+    /* ── Divider ─────────────────────────────────────────────────────── */
+    .sdl-divider {
+        height: 1px;
+        background: var(--sdl-border);
+        margin: 0 20px;
+    }
+
+    /* ── Body ────────────────────────────────────────────────────────── */
+    .sdl-body {
+        padding: 20px 20px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    /* ── Field ───────────────────────────────────────────────────────── */
+    .sdl-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .sdl-label {
+        font-family: var(--sdl-font-mono);
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--sdl-text-muted);
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* shared input/select base */
+    .sdl-input,
+    .sdl-select {
+        width: 100%;
+        height: 38px;
+        background: rgba(255,255,255,.04);
+        border: 1px solid var(--sdl-border);
+        border-radius: 8px;
+        color: var(--sdl-text);
+        font-family: var(--sdl-font-mono);
+        font-size: 12px;
+        padding: 0 12px;
+        outline: none;
+        transition: border-color .18s, background .18s, box-shadow .18s;
+        box-sizing: border-box;
+    }
+
+        .sdl-input::placeholder {
+            color: var(--sdl-text-muted);
+        }
+
+        .sdl-input:focus,
+        .sdl-select:focus {
+            border-color: var(--sdl-border-focus);
+            background: rgba(99,179,237,.04);
+            box-shadow: 0 0 0 3px rgba(99,179,237,.08);
+        }
+
+    /* ── Custom select wrapper ───────────────────────────────────────── */
+    .sdl-select-wrap {
+        position: relative;
+    }
+
+    .sdl-select {
+        appearance: none;
+        -webkit-appearance: none;
+        padding-right: 32px;
+        cursor: pointer;
+    }
+
+        .sdl-select option {
+            background: #1a2033;
+            color: var(--sdl-text);
+        }
+
+    .sdl-select-chevron {
+        position: absolute;
+        right: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 11px;
+        color: var(--sdl-text-muted);
+        pointer-events: none;
+        transition: transform .2s;
+    }
+
+    .sdl-select:focus + .sdl-select-chevron {
+        transform: translateY(-50%) rotate(180deg);
+        color: var(--sdl-accent);
+    }
+
+    /* ── Hint ────────────────────────────────────────────────────────── */
+    .sdl-hint {
+        font-family: var(--sdl-font-mono);
+        font-size: 10px;
+        color: var(--sdl-text-muted);
+        background: rgba(255,255,255,.025);
+        border: 1px solid var(--sdl-border);
+        border-radius: 7px;
+        padding: 9px 11px;
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        line-height: 1.6;
+    }
+
+        .sdl-hint i {
+            flex-shrink: 0;
+            margin-top: 2px;
+            opacity: .5;
+        }
+
+        .sdl-hint strong {
+            color: var(--sdl-text);
+            font-weight: 600;
+        }
+
+    /* ── Footer ──────────────────────────────────────────────────────── */
+    .sdl-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 14px 20px 18px;
+        border-top: 1px solid var(--sdl-border);
+    }
+
+    .sdl-btn-cancel {
+        height: 34px;
+        padding: 0 16px;
+        border-radius: 8px;
+        border: 1px solid var(--sdl-border);
+        background: transparent;
+        color: var(--sdl-text-muted);
+        font-family: var(--sdl-font-mono);
+        font-size: 11px;
+        cursor: pointer;
+        transition: background .15s, color .15s, border-color .15s;
+    }
+
+        .sdl-btn-cancel:hover {
+            background: rgba(255,255,255,.05);
+            color: var(--sdl-text);
+            border-color: rgba(255,255,255,.12);
+        }
+
+    .sdl-btn-save {
+        height: 34px;
+        padding: 0 18px;
+        border-radius: 8px;
+        border: 1px solid rgba(16,185,129,.4);
+        background: var(--sdl-accent-dim);
+        color: var(--sdl-accent);
+        font-family: var(--sdl-font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: background .15s, border-color .15s, transform .1s, box-shadow .15s;
+    }
+
+        .sdl-btn-save:hover {
+            background: rgba(16,185,129,.22);
+            border-color: rgba(16,185,129,.6);
+            box-shadow: 0 0 14px rgba(16,185,129,.18);
+        }
+
+        .sdl-btn-save:active {
+            transform: scale(.97);
+        }
+
+        .sdl-btn-save.sdl-saved {
+            background: rgba(16,185,129,.25);
+            border-color: var(--sdl-accent);
+            color: var(--sdl-accent);
+            pointer-events: none;
+        }
+
+    /* ── Responsive ──────────────────────────────────────────────────── */
+    @@media (max-width: 480px) {
+        .sdl-dialog {
+            border-radius: 12px 12px 0 0;
+            top: auto;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            transform: translateY(20px) scale(.98);
+        }
+
+            .sdl-dialog.sdl-visible {
+                transform: translateY(0) scale(1);
+            }
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+
+    const $backdrop   = $('#saveDialogBackdrop');
+    const $dialog     = $('#saveDialog');
+    const $closeBtn   = $('#sdlCloseBtn');
+    const $cancelBtn  = $('#sdlCancelBtn');
+    const $saveBtn    = $('#sdlSaveBtn');
+    const $colSelect  = $('#sdlCollectionSelect');
+    const $reqName    = $('#sdlReqName');
+
+    /* ── Populate collection dropdown from sidebar data ─────────── */
+    // Reads the already-rendered .collection-folder elements so we
+    // never need a second network request.
+    function populateCollections() {
+        $colSelect.find('option:not(:first)').remove(); // reset
+
+        $('.collection-folder .folder-header').each(function () {
+            const name = $(this).text().trim();
+            if (name) {
+                $colSelect.append(
+                    $('<option>', { value: name, text: name })
+                );
+            }
+        });
+    }
+
+    /* ── Open ───────────────────────────────────────────────────── */
+    function openDialog() {
+        populateCollections();
+
+        // Pre-fill request name from URL tail or active item name
+        const activeItemName = $('.collection-item.active').text().trim();
+        const urlTail = $('.url-input').val().split('/').filter(Boolean).pop() || '';
+        $reqName.val(activeItemName || urlTail || '');
+
+        $backdrop.addClass('sdl-visible');
+        $dialog.addClass('sdl-visible');
+        setTimeout(() => $reqName.focus(), 240);
+    }
+
+    /* ── Close ──────────────────────────────────────────────────── */
+    function closeDialog() {
+        $backdrop.removeClass('sdl-visible');
+        $dialog.removeClass('sdl-visible');
+        // Reset save button if it was in "saved" state
+        $saveBtn
+            .removeClass('sdl-saved')
+            .html('<i class="bi bi-check2"></i> Save');
+    }
+
+    /* ── Hijack the existing Save button ────────────────────────── */
+    // Remove old inline handler and replace with dialog opener
+    $('#saveBtn').off('click').on('click', function (e) {
+        e.stopPropagation();
+        openDialog();
+    });
+
+    /* ── Close triggers ─────────────────────────────────────────── */
+    $closeBtn.on('click', closeDialog);
+    $cancelBtn.on('click', closeDialog);
+    $backdrop.on('click', closeDialog);
+
+    // ESC key
+    $(document).on('keydown.saveDialog', function (e) {
+        if (e.key === 'Escape' && $dialog.hasClass('sdl-visible')) closeDialog();
+    });
+
+    /* ── Confirm Save ───────────────────────────────────────────── */
+    $saveBtn.on('click', function () {
+        const collection = $colSelect.val();
+        const name       = $reqName.val().trim() || 'New Request';
+        const method     = $('#methodSelect').val();
+        const url        = $('.url-input').val();
+        const body       = $('#codeArea').val();
+
+        if (!collection) {
+            // Shake the select to signal validation error
+            $colSelect.css('border-color', '#ef4444');
+            $colSelect[0].animate
+                ? $colSelect[0].animate(
+                    [{ transform:'translateX(-4px)' },{ transform:'translateX(4px)' },{ transform:'translateX(0)' }],
+                    { duration: 250, iterations: 2 }
+                  )
+                : null;
+            setTimeout(() => $colSelect.css('border-color', ''), 900);
+            return;
+        }
+
+        /* ── Find or create the target folder in the sidebar ────── */
+        let $targetFolder = null;
+        $('.collection-folder .folder-header').each(function () {
+            if ($(this).text().trim() === collection) {
+                $targetFolder = $(this).closest('.collection-folder');
+            }
+        });
+
+        if (!$targetFolder) {
+            // Collection no longer exists – create it
+            $targetFolder = $(`
+                <div class="collection-folder open">
+                    <div class="col-section-label folder-header">
+                        <i class="bi bi-chevron-down folder-icon"></i> ${collection}
+                    </div>
+                    <div class="folder-body"></div>
+                </div>
+            `);
+            $('.collection-list').append($targetFolder);
+        }
+
+        // Determine method label from the select text
+        const methodText = $('#methodSelect option:selected').text().trim();
+
+        const methodColorMap = {
+            'GET'   : 'var(--method-get)',
+            'POST'  : 'var(--method-post)',
+            'PUT'   : 'var(--method-put)',
+            'DELETE': 'var(--method-delete)'
+        };
+        const dotColor = methodColorMap[methodText] || 'var(--method-get)';
+
+        const $newItem = $(`
+            <div class="collection-item request-item"
+                 data-url="${url}"
+                 data-method-id="${method}"
+                 data-method="${methodText}"
+                 data-body="">
+                <div class="method-dot" style="background:${dotColor};"></div>
+                ${name}
+            </div>
+        `);
+
+        $targetFolder.find('.folder-body').append($newItem);
+
+        /* ── Success feedback ────────────────────────────────────── */
+        $saveBtn
+            .addClass('sdl-saved')
+            .html('<i class="bi bi-check2-all"></i> Saved!');
+
+        setTimeout(closeDialog, 900);
+    });
+
+});</script>

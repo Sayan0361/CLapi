@@ -13,8 +13,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
-    <link rel="stylesheet" href="~/Content/index.css"> 
+    <link rel="stylesheet" href="~/Content/index.css">
 </head>
+@Html.Partial("_SaveCollectionDialog")
 <body>
     <!-- TITLE BAR -->
     <div id="titleBar">
@@ -99,9 +100,8 @@
                     <select class="method-select active" id="methodSelect" style="color: #10B981;">
                         @*options will go here*@
                     </select>
-                    <input type="text" class="url-input" 
-                           placeholder="https://api.example.com/v1/endpoint"
-                           >
+                    <input type="text" class="url-input"
+                           placeholder="https://api.example.com/v1/endpoint">
                     <div class="url-actions">
                         <div class="btn-icon" title="Copy URL" style="width:30px;height:30px;"><i class="bi bi-copy" style="font-size:11px;"></i></div>
                         <div class="btn-icon" title="Params" style="width:30px;height:30px;"><i class="bi bi-sliders" style="font-size:11px;"></i></div>
@@ -448,7 +448,7 @@
 
                         $('#respBody').html(`
                             <div style="width:100%;height:100%;padding:16px;overflow:auto;">
-    
+
                                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
                                     <span style="
                                         font-size:11px;
@@ -476,7 +476,7 @@
 
 
 
-                
+
 
                 if (isMobile()) {
                     $bnavTabs.removeClass('active');
@@ -566,7 +566,7 @@
                         `
                         $methodSelect.append(html)
                     })
-                    
+
                 },
                 error: function(response){
                     console.log('E: Response: ', response);

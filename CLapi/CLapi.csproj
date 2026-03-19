@@ -16,7 +16,7 @@
     <AssemblyName>CLapi</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>true</UseIISExpress>
+    <UseIISExpress>false</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44319</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
@@ -242,6 +242,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Auth\SignUp.cshtml" />
     <Content Include="Views\Auth\LogIn.cshtml" />
+    <Content Include="Views\Home\_SaveCollectionDialog.cshtml" />
     <None Include="Web.local.config" />
   </ItemGroup>
   <ItemGroup>
