@@ -952,3 +952,31 @@ body.dragging {
 .collection-folder.open .folder-body {
     max-height: 500px; /* enough for items */
 }
+
+/* Monaco container */
+.editor-row {
+    height: 300px; /* or whatever height you prefer */
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+#codeEditor {
+    border-radius: 6px;
+}
+
+/* Scrollbar inside Monaco */
+.monaco-editor .scrollbar > .slider {
+    border-radius: 4px !important;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* Response syntax colors */
+#respBody .key     { color: #7DD3FC; }
+#respBody .string  { color: #A3E635; }
+#respBody .number  { color: #FB923C; }
+#respBody .boolean { color: #F472B6; }
+#respBody .null    { color: #94A3B8; }

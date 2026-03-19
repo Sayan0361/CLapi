@@ -14,6 +14,7 @@
     <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
     <link rel="stylesheet" href="~/Content/index.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
 </head>
 @Html.Partial("_SaveCollectionDialog")
 <body>
@@ -125,14 +126,8 @@
                     <div class="btn-icon" title="Clear" style="width:30px;height:30px;"><i class="bi bi-trash3" style="font-size:11px;"></i></div>
                 </div>
                 <div class="editor-wrap">
-                    <div class="editor-row">
-                        <div class="line-numbers" id="lineNums">
-                            <div class="line-num">1</div>
-                            <div class="line-num">2</div>
-                            <div class="line-num">3</div>
-                        </div>
-                        <textarea class="code-area" id="codeArea" spellcheck="false">
-                        </textarea>
+                    <div class="editor-row" style="height:300px;">
+                        <div id="codeEditor" style="width:100%;height:100%;"></div>
                     </div>
                 </div>
             </div>
@@ -203,315 +198,327 @@
     <script>
         $(document).ready(function () {
             var data = @Html.Raw(Json.Encode(Model));
-            console.log(data);
             var collections = data.collections;
 
+            /* ── Monaco Editor ── */
+            let editor;
 
+            require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+
+            require(['vs/editor/editor.main'], function () {
+
+                // Define a custom dark theme that matches your app palette
+                monaco.editor.defineTheme('clapi-dark', {
+                    base: 'vs-dark',
+                    inherit: true,
+                    rules: [
+                        { token: 'string.key.json',   foreground: '7DD3FC' }, // keys  → sky blue
+                        { token: 'string.value.json',  foreground: 'A3E635' }, // string values → lime
+                        { token: 'number.json',        foreground: 'FB923C' }, // numbers → orange
+                        { token: 'keyword.json',       foreground: 'F472B6' }, // true/false/null → pink
+                        { token: 'delimiter.bracket',  foreground: '94A3B8' }, // {} [] → slate
+                        { token: 'delimiter',          foreground: '64748B' }, // , : → muted
+                    ],
+                    colors: {
+                        'editor.background':           '#0F1117',
+                        'editor.foreground':           '#CBD5E1',
+                        'editorLineNumber.foreground': '#334155',
+                        'editorLineNumber.activeForeground': '#64748B',
+                        'editor.lineHighlightBackground': '#1E293B55',
+                        'editorCursor.foreground':     '#10B981',
+                        'editor.selectionBackground':  '#10B98133',
+                        'editorBracketMatch.background': '#10B98122',
+                        'editorBracketMatch.border':   '#10B981',
+                    }
+                });
+
+                editor = monaco.editor.create(document.getElementById('codeEditor'), {
+                    value: '',
+                    language: 'json',
+                    theme: 'clapi-dark',
+                    automaticLayout: true,
+                    fontFamily: '"JetBrains Mono", monospace',
+                    fontSize: 12,
+                    lineHeight: 20,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    renderLineHighlight: 'line',
+                    cursorBlinking: 'smooth',
+                    cursorSmoothCaretAnimation: 'on',
+                    bracketPairColorization: { enabled: true },
+                    formatOnPaste: true,
+                    tabSize: 2,
+                    scrollbar: {
+                        verticalScrollbarSize: 4,
+                        horizontalScrollbarSize: 4,
+                    }
+                });
+
+                // Format button → Monaco built-in formatter
+                $('.bi-braces').parent().on('click', function () {
+                    editor.getAction('editor.action.formatDocument').run();
+                });
+
+                // Clear button
+                $('.bi-trash3').parent().on('click', function () {
+                    editor.setValue('');
+                });
+
+            });
+
+            /* ── Collection item click ── */
             $('.request-item').on('click', function () {
-                var url = $(this).data("url");
-                var method = $(this).data("method");
+                var url      = $(this).data("url");
+                var method   = $(this).data("method");
                 var methodid = $(this).data("method-id");
-                var body = $(this).data("body");
+                var body     = $(this).data("body");
 
-                console.log("url", url);
-                console.log("method", method);
-                console.log("body", body);
-
-                let methodColor = '';
-                if (methodid == 2) methodColor = '#F59E0B'
-                else if (methodid == 1) methodColor = '#10B981'
-                else if (methodid == 4) methodColor = '#EF4444'
-                else methodColor = '#3B82F6'
-
-                $("#methodSelect").val(methodid);
-                $("#methodSelect").css('color', methodColor);
+                let methodColor = methodIdToColor(methodid);
+                $("#methodSelect").val(methodid).css('color', methodColor);
                 $(".url-input").val(url);
-                let parsed = body;
 
-                // Handle empty cases FIRST
-                if (!parsed || parsed === "" || parsed === "null") {
-                    $("#codeArea").val("");
-                    updateLines();
+                if (!body || body === "" || body === "null") {
+                    if (editor) editor.setValue('');
                     return;
                 }
 
-                // Try parsing if string
+                let parsed = body;
                 if (typeof parsed === "string") {
-                    try {
-                        parsed = JSON.parse(parsed);
-                    } catch {
-                        // If not valid JSON, just show raw string
-                        $("#codeArea").val(parsed);
-                        updateLines();
-                        return;
-                    }
+                    try { parsed = JSON.parse(parsed); } catch { /* not JSON */ }
                 }
 
-                // Normal JSON case
-                $("#codeArea").val(JSON.stringify(parsed, null, 2));
-                updateLines();
-               
-            })
+                if (editor) {
+                    const pretty = typeof parsed === 'object'
+                        ? JSON.stringify(parsed, null, 2)
+                        : String(parsed);
+                    editor.setValue(pretty);
+                    // Auto-format after setting
+                    setTimeout(() => editor.getAction('editor.action.formatDocument').run(), 100);
+                }
+            });
 
-            const isMobile = () => window.innerWidth <= 768;
+            /* ── Helpers ── */
+            function methodIdToColor(id) {
+                if (id == 2) return '#F59E0B';
+                if (id == 1) return '#10B981';
+                if (id == 4) return '#EF4444';
+                return '#3B82F6';
+            }
 
-            const $sidebar = $('#collectionsPane');
-            const $overlay = $('#sidebarOverlay');
+            function getStatusText(code) {
+                return ({ 200:'OK', 201:'Created', 204:'No Content',
+                          400:'Bad Request', 401:'Unauthorized',
+                          403:'Forbidden', 404:'Not Found',
+                          500:'Internal Server Error' })[code] || 'Unknown';
+            }
+
+            function syntaxHighlight(json) {
+                if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
+                json = json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                return json.replace(
+                    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(\.\d+)?)/g,
+                    function (m) {
+                        let cls = 'number';
+                        if (/^"/.test(m)) cls = /:$/.test(m) ? 'key' : 'string';
+                        else if (/true|false/.test(m)) cls = 'boolean';
+                        else if (/null/.test(m)) cls = 'null';
+                        return `<span class="${cls}">${m}</span>`;
+                    }
+                );
+            }
+
+            /* ── Sidebar ── */
+            const isMobile   = () => window.innerWidth <= 768;
+            const $sidebar   = $('#collectionsPane');
+            const $overlay   = $('#sidebarOverlay');
             const $deskToggle = $('#sidebarToggle');
             const $mobToggle = $('#mobileSidebarBtn');
             const $mainPanel = $('#mainPanel');
             const $inspector = $('#responseInspector');
-            const $lineNums = $('#lineNums');
             const $methodSelect = $('#methodSelect');
             const $dragHandle = $('#dragHandle');
-            const $bnavTabs = $('.bnav-tab');
-            const $urlInput = $('.url-input')
-            const $reqUrl = $('.url-input')
-            const $body = $('#codeArea');
+            const $bnavTabs  = $('.bnav-tab');
+            const $reqUrl    = $('.url-input');
 
-            /* ── Sidebar ── */
-            function openSidebar() {
-                $sidebar.removeClass('collapsed');
-                if (isMobile()) $overlay.addClass('visible');
-                else $deskToggle.removeClass('sidebar-closed');
-            }
-
-            function closeSidebar() {
-                $sidebar.addClass('collapsed');
-                $overlay.removeClass('visible');
-                if (!isMobile()) $deskToggle.addClass('sidebar-closed');
-            }
-
-            function toggleSidebar() {
-                $sidebar.hasClass('collapsed') ? openSidebar() : closeSidebar();
-            }
+            function openSidebar()  { $sidebar.removeClass('collapsed'); if (isMobile()) $overlay.addClass('visible'); else $deskToggle.removeClass('sidebar-closed'); }
+            function closeSidebar() { $sidebar.addClass('collapsed'); $overlay.removeClass('visible'); if (!isMobile()) $deskToggle.addClass('sidebar-closed'); }
+            function toggleSidebar() { $sidebar.hasClass('collapsed') ? openSidebar() : closeSidebar(); }
 
             $deskToggle.on('click', toggleSidebar);
             $mobToggle.on('click', toggleSidebar);
             $overlay.on('click', closeSidebar);
 
-            /* ── Collection items ── */
             $(document).on('click', '.collection-item', function () {
                 $('.collection-item').removeClass('active');
                 $(this).addClass('active');
                 if (isMobile()) closeSidebar();
             });
 
-            /* ── Bottom Nav ── */
             $bnavTabs.on('click', function () {
                 $bnavTabs.removeClass('active');
                 $(this).addClass('active');
-
                 const panel = $(this).data('panel');
-
-                if (panel === 'collections') {
-                    openSidebar();
-                    return;
-                }
-
+                if (panel === 'collections') { openSidebar(); return; }
                 closeSidebar();
-
-                if (panel === 'request') {
-                    $mainPanel.css('display', 'flex');
-                    $inspector.removeClass('mobile-visible');
-                } else {
-                    $mainPanel.css('display', 'none');
-                    $inspector.addClass('mobile-visible');
-                }
+                if (panel === 'request') { $mainPanel.css('display','flex'); $inspector.removeClass('mobile-visible'); }
+                else { $mainPanel.css('display','none'); $inspector.addClass('mobile-visible'); }
             });
 
-            $methodSelect.on('change', function(){
-
-                const selectedVal = $(this).val()
-                console.log(selectedVal)
-
-                let methodColor = '';
-                if(selectedVal == '2') methodColor = '#F59E0B'
-                else if(selectedVal == '1') methodColor = '#10B981'
-                else if(selectedVal == '4') methodColor = '#EF4444'
-                else methodColor = '#3B82F6'
-
-                 $(this).css('color', methodColor);
-
-            })
-
-            /* ── Line numbers ── */
-            function updateLines() {
-                const n = $body.val().split('\n').length;
-                let html = '';
-                for (let i = 1; i <= n; i++) {
-                    html += `<div class="line-num">${i}</div>`;
-                }
-                $lineNums.html(html);
-            }
-
-            $body.on('input', updateLines);
-
-            $body.on('scroll', function () {
-                $lineNums.scrollTop($(this).scrollTop());
+            $methodSelect.on('change', function () {
+                $(this).css('color', methodIdToColor($(this).val()));
             });
 
-            updateLines();
-
-            /* Prettier JSON code */
-            $body.on('blur', function () {
-                try {
-                    let formatted = JSON.stringify(JSON.parse($body.val()), null, 2);
-                    $body.val(formatted);
-                    updateLines();
-                } catch {}
-            });
-
-            $('.bi-braces').parent().on('click', function () {
-                try {
-                    let formatted = JSON.stringify(JSON.parse($body.val()), null, 2);
-                    $body.val(formatted);
-                    updateLines();
-                } catch {
-                    alert("Invalid JSON");
-                }
-            });
-
-            /* ── Drag resize (desktop) ── */
+            /* ── Drag resize ── */
             let dragging = false;
-
-            $dragHandle.on('mousedown', function () {
-                dragging = true;
-                $('body').addClass('dragging');
-            });
-
+            $dragHandle.on('mousedown', () => { dragging = true; $('body').addClass('dragging'); });
             $(document).on('mousemove', function (e) {
                 if (!dragging) return;
-
                 const w = window.innerWidth - e.clientX;
-                if (w > 260 && w < 800) {
-                    $inspector.css('width', w + 'px');
-                }
+                if (w > 260 && w < 800) $inspector.css('width', w + 'px');
             });
-
-            $(document).on('mouseup', function () {
-                dragging = false;
-                $('body').removeClass('dragging');
-            });
+            $(document).on('mouseup', () => { dragging = false; $('body').removeClass('dragging'); });
 
             /* ── Tabs ── */
-            $('.req-tab').on('click', function () {
-                $('.req-tab').removeClass('active');
-                $(this).addClass('active');
-            });
+            $('.req-tab').on('click', function () { $('.req-tab').removeClass('active'); $(this).addClass('active'); });
+            $('.resp-tab').on('click', function () { $('.resp-tab').removeClass('active'); $(this).addClass('active'); });
 
-            $('.resp-tab').on('click', function () {
-                $('.resp-tab').removeClass('active');
-                $(this).addClass('active');
-            });
-
-            function syntaxHighlight(json) {
-                if (typeof json !== 'string') {
-                    json = JSON.stringify(json, null, 2);
-                }
-
-                json = json
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;');
-
-                return json.replace(
-                    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(\.\d+)?)/g,
-                    function (match) {
-                        let cls = 'number';
-
-                        if (/^"/.test(match)) {
-                            cls = /:$/.test(match) ? 'key' : 'string';
-                        } else if (/true|false/.test(match)) {
-                            cls = 'boolean';
-                        } else if (/null/.test(match)) {
-                            cls = 'null';
-                        }
-
-                        return `<span class="${cls}">${match}</span>`;
-                    }
-                );
-            }
-
-            function getStatusText(code) {
-                const map = {
-                    200: "OK",
-                    201: "Created",
-                    400: "Bad Request",
-                    401: "Unauthorized",
-                    403: "Forbidden",
-                    404: "Not Found",
-                    500: "Internal Server Error"
-                };
-
-                return map[code] || "Unknown";
-            }
             /* ── Send ── */
             function doSend() {
+                const bodyVal = editor ? editor.getValue() : '';
+
+                // Show loading state
+                $('#respBody').html(`
+                    <div style="display:flex;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--text-secondary);font-size:12px;font-family:'JetBrains Mono',monospace;">
+                        <i class="bi bi-hourglass-split" style="animation:spin 1s linear infinite;"></i> Sending...
+                    </div>
+                `);
 
                 $.ajax({
                     url: '@Url.Action("SendPostRequest", "Request")',
                     type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded',
                     data: {
                         RequestURL: $reqUrl.val(),
-                        Body: $body.val(),
-                        MethodId: parseInt($methodSelect.val()),
-                        UserId: 2,
+                        Body:       bodyVal,
+                        MethodId:   parseInt($methodSelect.val()),
+                        UserId:     2,
                         CollectionId: 1,
                         StatusCode: 200
                     },
                     success: function (response) {
-                        console.log("S-Response: ", response);
+                        console.log("Raw response:", response);
 
-                        const parsedData = JSON.parse(response.Body);
-                        console.log("ParsedData: ", parsedData);
+                        let displayData;
+                        let status = 200;
 
-                        console.log("$body.val(): ", $body.val());
-                        console.log("$reqUrl.val(): ", $reqUrl.val());
+                        try {
+                            // If response is already an object (jQuery auto-parsed JSON)
+                            if (typeof response === 'object' && response !== null) {
+                                if (response.Body !== undefined) {
+                                    try { displayData = JSON.parse(response.Body); }
+                                    catch { displayData = response.Body; }
+                                } else if (response.body !== undefined) {
+                                    try { displayData = JSON.parse(response.body); }
+                                    catch { displayData = response.body; }
+                                } else if (response.data !== undefined) {
+                                    displayData = response.data;
+                                } else {
+                                    displayData = response;
+                                }
+                                status = response.StatusCode || response.statusCode || response.status || 200;
+                            }
+                            // If response is a string
+                            else if (typeof response === 'string') {
+                                try { displayData = JSON.parse(response); }
+                                catch { displayData = response; }
+                                status = (displayData && (displayData.statusCode || displayData.StatusCode)) || 200;
+                            } else {
+                                displayData = response;
+                            }
+                        } catch(e) {
+                            displayData = response;
+                        }
 
+                        // Resolve status from parsed data if not found at top level
+                        if (displayData && typeof displayData === 'object') {
+                            status = displayData.statusCode || displayData.StatusCode || displayData.status || status;
+                        }
 
-                        //let parsedData = response;
-
-                        let status = parsedData.statusCode || 200;
-
-                        // Decide color + label
                         let statusText = getStatusText(status);
-                        let color = "#10b981"; // green
+                        let color = status >= 500 ? '#ef4444' : status >= 400 ? '#ef4444' : status >= 300 ? '#f59e0b' : '#10b981';
+                        let timeTaken = '—';
 
-                        if (status >= 400) {
-                            color = "#ef4444"; // red
-                            statusText = "ERROR";
-                        } else if (status >= 300) {
-                            color = "#f59e0b"; // yellow
-                            statusText = "REDIRECT";
+                        const highlighted = typeof displayData === 'object'
+                            ? syntaxHighlight(JSON.stringify(displayData, null, 2))
+                            : `<span style="color:#CBD5E1">${String(displayData)}</span>`;
+
+                        $('#respBody').html(`
+                            <div style="width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;">
+                                <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                                    <span style="font-size:11px;font-weight:600;color:${color};background:${color}18;border:1px solid ${color}44;border-radius:5px;padding:2px 10px;font-family:'JetBrains Mono',monospace;">
+                                        ${status} ${statusText}
+                                    </span>
+                                    <span style="font-size:10px;color:var(--text-secondary);margin-left:auto;">JSON</span>
+                                </div>
+                                <div style="flex:1;overflow:auto;padding:14px 16px;">
+                                    <pre style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;white-space:pre-wrap;margin:0;">${highlighted}</pre>
+                                </div>
+                            </div>
+                        `);
+                    },
+                    error: function (xhr, status, err) {
+                        console.log("AJAX error:", xhr, status, err);
+
+                        let errStatus = xhr.status || 0;
+                        let errText = xhr.statusText || 'Request Failed';
+                        let display;
+
+                        // Try parsing JSON error
+                        try {
+                            const parsed = JSON.parse(xhr.responseText);
+
+                            display = syntaxHighlight(JSON.stringify(parsed, null, 2));
+                        } 
+                        catch {
+                            // If NOT JSON (HTML or plain text)
+                            let raw = xhr.responseText || '';
+
+                            // Remove HTML tags if it's an error page
+                            if (raw.includes("<html")) {
+                                raw = "Server returned an HTML error page.\nCheck backend logs.";
+                            }
+
+                            display = `<span style="color:#CBD5E1">${raw || 'No response body'}</span>`;
                         }
 
                         $('#respBody').html(`
-                            <div style="width:100%;height:100%;padding:16px;overflow:auto;">
-
-                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                            <div style="width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;">
+            
+                                <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
                                     <span style="
                                         font-size:11px;
                                         font-weight:600;
-                                        color:${color};
-                                        background:rgba(0,0,0,0.2);
-                                        border:1px solid ${color};
+                                        color:#ef4444;
+                                        background:#ef444418;
+                                        border:1px solid #ef444444;
                                         border-radius:5px;
-                                        padding:3px 10px;">
-                                        ${status} ${statusText}
+                                        padding:2px 10px;
+                                        font-family:'JetBrains Mono',monospace;">
+                                        ${errStatus} ${errText}
                                     </span>
                                 </div>
 
-                                <pre style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;">${syntaxHighlight(parsedData)}</pre>
+                                <div style="flex:1;overflow:auto;padding:14px 16px;">
+                                    <pre style="font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;white-space:pre-wrap;margin:0;">
+                                     ${display}
+                                    </pre>
+                                </div>
 
                             </div>
                         `);
-
-                    },
-                    error: function (response) {
-                        console.log("E-Response: ", response);
                     }
-                })
+                });
 
                 if (isMobile()) {
                     $bnavTabs.removeClass('active');
@@ -522,90 +529,114 @@
             }
 
             $('#sendBtn').on('click', doSend);
-
-            $(document).on('keydown', function (e) {
-                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-                    doSend();
-                }
-            });
+            $(document).on('keydown', function (e) { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') doSend(); });
 
             /* ── Save ── */
             $('#saveBtn').on('click', function () {
-                const url = $('.url-input').val();
-                const name = url.split('/').pop() || 'New Request';
-                const method = $methodSelect.val();
+                const url      = $reqUrl.val().trim();
+                const bodyVal  = editor ? editor.getValue() : '';
+                const methodId = parseInt($methodSelect.val());
 
-                const $item = $(`
-                                    <div class="collection-item">
-                                        <div class="method-dot" style="background:var(--method-${method.toLowerCase()})"></div>
-                                        ${name}
+                if (!url) {
+                    alert('Enter a URL before saving.');
+                    return;
+                }
+
+                // Show saving state
+                const $btn = $(this);
+                $btn.prop('disabled', true)
+                    .html('<i class="bi bi-hourglass-split"></i> Saving...');
+
+                $.ajax({
+                    url: '@Url.Action("SaveRequest", "Request")',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: {
+                        RequestURL:   url,
+                        Body:         bodyVal,
+                        MethodId:     methodId,
+                        CollectionId: 1,      // hardcoded for now — wire to a picker later
+                        UserId:       2,
+                        RequestName:  url.split('/').pop() || 'New Request',
+                        StatusCode:   200
+                    },
+                    success: function (response) {
+                        console.log('Saved:', response);
+
+                        // Add item to sidebar DOM
+                        const name       = url.split('/').pop() || 'New Request';
+                        const methodName = $methodSelect.find('option:selected').text();
+                        const dotColor   = methodIdToColor(methodId);
+
+                        const $item = $(`
+                            <div class="collection-item request-item"
+                                 data-url="${url}"
+                                 data-method-id="${methodId}"
+                                 data-method="${methodName}"
+                                 data-body="${bodyVal.replace(/"/g, '&quot;')}">
+                                <div class="method-dot" style="background:${dotColor}"></div>
+                                ${name}
+                            </div>
+                        `);
+
+                        // Append to first folder, or create a new one
+                        let $target = $('.folder-body').first();
+                        if ($target.length === 0) {
+                            const $newFolder = $(`
+                                <div class="collection-folder open">
+                                    <div class="col-section-label folder-header">
+                                        <i class="bi bi-chevron-down folder-icon"></i> My Collection
                                     </div>
-                                `);
+                                    <div class="folder-body"></div>
+                                </div>
+                            `);
+                            $('.collection-list').append($newFolder);
+                            $target = $newFolder.find('.folder-body');
+                        }
+                        $target.append($item);
 
-                $('.collection-list').append($item);
+                        $btn.css({ background:'rgba(16,185,129,0.15)', borderColor:'#10b981', color:'#10b981' })
+                            .html('<i class="bi bi-check2"></i> Saved!');
+                    },
+                    error: function (xhr) {
+                        console.log('Save failed:', xhr);
 
-                $(this)
-                    .css({
-                        background: 'rgba(16,185,129,0.15)',
-                        borderColor: '#10b981',
-                        color: '#10b981'
-                    })
-                    .html('<i class="bi bi-check2"></i> Saved!');
-
-                setTimeout(() => {
-                    $(this)
-                        .attr('style', '')
-                        .html('<i class="bi bi-bookmark-plus"></i><span class="save-label"> Save to Collection</span>');
-                }, 1500);
+                        $btn.css({ background:'rgba(239,68,68,0.15)', borderColor:'#ef4444', color:'#ef4444' })
+                            .html('<i class="bi bi-x"></i> Failed');
+                    },
+                    complete: function () {
+                        setTimeout(() => {
+                            $btn.prop('disabled', false)
+                                .attr('style', '')
+                                .html('<i class="bi bi-bookmark-plus"></i><span class="save-label"> Save to Collection</span>');
+                        }, 1800);
+                    }
+                });
             });
 
             /* ── Resize reset ── */
             $(window).on('resize', function () {
-                if (!isMobile()) {
-                    $mainPanel.css('display', 'flex');
-                    $inspector.removeClass('mobile-visible');
-                    $overlay.removeClass('visible');
-                }
+                if (!isMobile()) { $mainPanel.css('display','flex'); $inspector.removeClass('mobile-visible'); $overlay.removeClass('visible'); }
             });
 
-            /* ── Accordion (Collections) ── */
+            /* ── Accordion ── */
             $(document).on('click', '.folder-header', function () {
-                const $folder = $(this).parent();
-
-                if ($folder.hasClass('collapsed')) {
-                    $folder.removeClass('collapsed').addClass('open');
-                } else {
-                    $folder.removeClass('open').addClass('collapsed');
-                }
+                const $f = $(this).parent();
+                $f.hasClass('collapsed') ? $f.removeClass('collapsed').addClass('open') : $f.removeClass('open').addClass('collapsed');
             });
 
+            /* ── Load Methods ── */
             $.ajax({
                 url: '@Url.Action("GetMethods", "Home")',
-                type:'GET',
-                data: {
+                type: 'GET',
+                success: function (response) {
+                    response.methods.forEach(function (r) {
+                        let color = r.MethodType === 'POST' ? '#F59E0B' : r.MethodType === 'GET' ? '#10B981' : r.MethodType === 'DELETE' ? '#EF4444' : '#3B82F6';
+                        $methodSelect.append(`<option value="${r.MethodId}" style="color:${color}">${r.MethodType}</option>`);
+                    });
                 },
-                success: function(response){
-                    console.log('S: Response: ', response.methods);
-
-                    response.methods.forEach((r)=>{
-
-                        let methodColor = '';
-                        if(r.MethodType == "POST") methodColor = '#F59E0B'
-                        else if(r.MethodType == "GET") methodColor = '#10B981'
-                        else if(r.MethodType == "DELETE") methodColor = '#EF4444'
-                        else methodColor = '#3B82F6'
-
-                        const html = `
-                            <option value=${r.MethodId} style='color: ${methodColor}'>${r.MethodType}</option>
-                        `
-                        $methodSelect.append(html)
-                    })
-
-                },
-                error: function(response){
-                    console.log('E: Response: ', response);
-                }
-            })
+                error: function (r) { console.log('E: Methods:', r); }
+            });
 
         });
     </script>
