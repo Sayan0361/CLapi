@@ -170,7 +170,7 @@
                 <span class="resp-title">Response</span>
                 <div style="flex:1"></div>
                 <div class="btn-icon" id="response-copy-btn" title="Copy" style="width:30px;height:30px;"><i class="bi bi-copy" style="font-size:11px;"></i></div>
-                <div class="btn-icon" title="Download" style="width:30px;height:30px;"><i class="bi bi-download" style="font-size:11px;"></i></div>
+                <div class="btn-icon" id="export-response" title="Download" style="width:30px;height:30px;"><i class="bi bi-download" style="font-size:11px;"></i></div>
             </div>
             <div class="resp-tabs">
                 <div class="resp-tab active">Body</div>
@@ -204,6 +204,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         var editor;
+        let lastResponse;
         $(document).ready(function () {
             var data = @Html.Raw(Json.Encode(Model));
             var collections = data.collections;
@@ -476,6 +477,8 @@
                             displayData = response;
                         }
 
+                        lastResponse = response;
+
                         // Resolve status from parsed data if not found at top level
                         if (displayData && typeof displayData === 'object') {
                             status = displayData.statusCode || displayData.StatusCode || displayData.status || status;
@@ -695,6 +698,36 @@
                 }, 2000);
             }
 
+
+            function exportResponseToJSON(response, filename = "response.json") {
+
+                let data = response;
+
+                if (response && typeof response === "string") {
+                    try {
+                        data = JSON.parse(response);
+                    } catch {
+                        data = response;
+                    }
+                }
+
+                const responseStr = JSON.stringify(data, null, 2);
+
+                const blob = new Blob([responseStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+
+                const $a = $('<a>');
+                $a.attr({
+                    href: url,
+                    download: filename
+                }).appendTo('body');
+
+                $a[0].click();
+                $a.remove();
+
+                URL.revokeObjectURL(url);
+            }
+
             $('#copyBtn').on('click',function(){
                     const copiedURL = $('#urlInput').val();
                     console.log('CopiedURL: ', copiedURL)
@@ -709,16 +742,22 @@
             })
 
             $('#response-copy-btn').on('click',function(){
-                    const copiedURL = $('#respBody').text();
-                    console.log('respBody: ', copiedURL)
+                    const responseBody = $('#respBody').text();
+                    console.log('respBody: ', responseBody)
                     
-                    navigator.clipboard.writeText(copiedURL)
+                    navigator.clipboard.writeText(responseBody)
                         .then(() => {
                             showToast("Response Copied to Clipboard!");
                         })
                         .catch(err => {
                             console.error("Copy Failed: ", err);
                         })
+            })
+
+            $('#export-response').on('click',function(){
+                    const responseBody = lastResponse;
+                    
+                    exportResponseToJSON(responseBody.Body)
             })
 
         });
