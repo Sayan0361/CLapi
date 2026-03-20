@@ -102,5 +102,31 @@ namespace CLapi.Controllers
                 });
             }
         }
+
+        [HttpPost]
+        public JsonResult CreateNewCollection(CollectionModel collection)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return Json(new
+                {
+                    Success = 0,
+                    Message = string.Join(", ", errors)
+                });
+            }
+
+            CollectionDAL collectionDAL = new CollectionDAL();
+            var response = collectionDAL.addOrEditCollection(
+                collection.collectionName,
+                collection.UserId
+            );
+
+            return Json(response);
+        }
     }
 }

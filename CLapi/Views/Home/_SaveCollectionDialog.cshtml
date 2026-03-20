@@ -43,7 +43,7 @@
         </div>
 
         <!-- Collection picker -->
-        <div class="sdl-field">
+        <div class="sdl-field" id="sdlExistingField">
             <label class="sdl-label" for="sdlCollectionSelect">
                 <i class="bi bi-folder2" style="font-size:10px;opacity:.6;"></i>
                 Collection
@@ -54,6 +54,41 @@
                     <!-- Options injected by JS from the existing collections data -->
                 </select>
                 <i class="bi bi-chevron-down sdl-select-chevron"></i>
+            </div>
+        </div>
+
+        <!-- ── New Collection toggle ───────────────────────────────── -->
+        <div class="sdl-new-col-toggle" id="sdlNewColToggle">
+            <div class="sdl-toggle-line"></div>
+            <button class="sdl-toggle-btn" id="sdlToggleNewCol" type="button">
+                <i class="bi bi-plus-circle"></i>
+                New Collection
+            </button>
+            <div class="sdl-toggle-line"></div>
+        </div>
+
+        <!-- ── New Collection panel (collapsed by default) ────────── -->
+        <div class="sdl-new-col-panel" id="sdlNewColPanel">
+            <div class="sdl-new-col-inner">
+                <div class="sdl-field">
+                    <label class="sdl-label" for="sdlNewColName">
+                        <i class="bi bi-folder-plus" style="font-size:10px;opacity:.6;"></i>
+                        Collection Name
+                    </label>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input id="sdlNewColName"
+                               class="sdl-input"
+                               type="text"
+                               placeholder="e.g. Auth API, User Service…"
+                               autocomplete="off"
+                               style="flex:1;" />
+                        <button class="sdl-btn-create-col" id="sdlCreateColBtn" type="button">
+                            <i class="bi bi-plus"></i>
+                            Create
+                        </button>
+                    </div>
+                    <div class="sdl-new-col-error" id="sdlNewColError"></div>
+                </div>
             </div>
         </div>
 
@@ -75,8 +110,6 @@
     </div>
 
 </div>
-
-
 
 <style>
 
@@ -336,7 +369,6 @@
             font-weight: 600;
         }
 
-    /* ── Footer ──────────────────────────────────────────────────────── */
     .sdl-footer {
         display: flex;
         align-items: center;
@@ -399,6 +431,145 @@
             pointer-events: none;
         }
 
+    .sdl-new-col-toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 2px 0;
+    }
+
+    .sdl-toggle-line {
+        flex: 1;
+        height: 1px;
+        background: var(--sdl-border);
+    }
+
+    .sdl-toggle-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 26px;
+        padding: 0 12px;
+        border-radius: 20px;
+        border: 1px solid var(--sdl-border);
+        background: transparent;
+        color: var(--sdl-text-muted);
+        font-family: var(--sdl-font-mono);
+        font-size: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background .15s, color .15s, border-color .15s;
+        letter-spacing: .04em;
+    }
+
+        .sdl-toggle-btn i {
+            font-size: 12px;
+            transition: transform .25s cubic-bezier(.34,1.4,.64,1);
+        }
+
+        .sdl-toggle-btn:hover {
+            background: var(--sdl-accent-dim);
+            color: var(--sdl-accent);
+            border-color: rgba(16,185,129,.3);
+        }
+
+        .sdl-toggle-btn.sdl-open {
+            background: var(--sdl-accent-dim);
+            color: var(--sdl-accent);
+            border-color: rgba(16,185,129,.3);
+        }
+
+            .sdl-toggle-btn.sdl-open i {
+                transform: rotate(45deg);
+            }
+
+    .sdl-new-col-panel {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows .28s cubic-bezier(.4,0,.2,1);
+    }
+
+        .sdl-new-col-panel.sdl-panel-open {
+            grid-template-rows: 1fr;
+        }
+
+    .sdl-new-col-inner {
+        overflow: hidden;
+    }
+
+    /* inner padding animated via padding-top */
+    .sdl-new-col-panel .sdl-field {
+        padding-top: 0;
+        transition: padding-top .2s ease;
+    }
+
+    .sdl-new-col-panel.sdl-panel-open .sdl-field {
+        padding-top: 2px;
+    }
+
+    /* Create button */
+    .sdl-btn-create-col {
+        height: 38px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(16,185,129,.35);
+        background: var(--sdl-accent-dim);
+        color: var(--sdl-accent);
+        font-family: var(--sdl-font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: background .15s, border-color .15s, box-shadow .15s, transform .1s;
+    }
+
+        .sdl-btn-create-col:hover {
+            background: rgba(16,185,129,.22);
+            border-color: rgba(16,185,129,.6);
+            box-shadow: 0 0 10px rgba(16,185,129,.15);
+        }
+
+        .sdl-btn-create-col:active {
+            transform: scale(.97);
+        }
+
+    /* Error message */
+    .sdl-new-col-error {
+        font-family: var(--sdl-font-mono);
+        font-size: 10px;
+        color: #ef4444;
+        min-height: 0;
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height .2s ease, margin-top .2s ease;
+        margin-top: 0;
+    }
+
+        .sdl-new-col-error.sdl-error-visible {
+            max-height: 30px;
+            margin-top: 5px;
+        }
+
+    /* "Created" flash on the select option */
+    @@keyframes sdl-flash-new {
+        0% {
+            background: rgba(16,185,129,.18);
+        }
+
+        100% {
+            background: transparent;
+        }
+    }
+
+    .sdl-select option.sdl-just-created {
+        animation: sdl-flash-new .9s ease forwards;
+    }
+
     /* ── Responsive ──────────────────────────────────────────────────── */
     @@media (max-width: 480px) {
         .sdl-dialog {
@@ -418,146 +589,270 @@
 </style>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 <script>
     $(document).ready(function () {
 
-    const $backdrop   = $('#saveDialogBackdrop');
-    const $dialog     = $('#saveDialog');
-    const $closeBtn   = $('#sdlCloseBtn');
-    const $cancelBtn  = $('#sdlCancelBtn');
-    const $saveBtn    = $('#sdlSaveBtn');
-    const $colSelect  = $('#sdlCollectionSelect');
-    const $reqName    = $('#sdlReqName');
+        const $backdrop = $('#saveDialogBackdrop');
+        const $dialog = $('#saveDialog');
+        const $closeBtn = $('#sdlCloseBtn');
+        const $cancelBtn = $('#sdlCancelBtn');
+        const $saveBtn = $('#sdlSaveBtn');
+        const $colSelect = $('#sdlCollectionSelect');
+        const $reqName = $('#sdlReqName');
+        const $toggleBtn = $('#sdlToggleNewCol');
+        const $newColPanel = $('#sdlNewColPanel');
+        const $newColName = $('#sdlNewColName');
+        const $createColBtn = $('#sdlCreateColBtn');
+        const $newColError = $('#sdlNewColError');
 
-    /* ── Populate collection dropdown from sidebar data ─────────── */
-    // Reads the already-rendered .collection-folder elements so we
-    // never need a second network request.
-    function populateCollections() {
-        $colSelect.find('option:not(:first)').remove(); // reset
+        var data = @Html.Raw(Json.Encode(Model));
+        var collections = data.collections;
+        console.log("data from PV: ",data)
 
-        $('.collection-folder .folder-header').each(function () {
-            const name = $(this).text().trim();
-            if (name) {
-                $colSelect.append(
-                    $('<option>', { value: name, text: name })
-                );
-            }
-        });
-    }
-
-    /* ── Open ───────────────────────────────────────────────────── */
-    function openDialog() {
-        populateCollections();
-
-        // Pre-fill request name from URL tail or active item name
-        const activeItemName = $('.collection-item.active').text().trim();
-        const urlTail = $('.url-input').val().split('/').filter(Boolean).pop() || '';
-        $reqName.val(activeItemName || urlTail || '');
-
-        $backdrop.addClass('sdl-visible');
-        $dialog.addClass('sdl-visible');
-        setTimeout(() => $reqName.focus(), 240);
-    }
-
-    /* ── Close ──────────────────────────────────────────────────── */
-    function closeDialog() {
-        $backdrop.removeClass('sdl-visible');
-        $dialog.removeClass('sdl-visible');
-        // Reset save button if it was in "saved" state
-        $saveBtn
-            .removeClass('sdl-saved')
-            .html('<i class="bi bi-check2"></i> Save');
-    }
-
-    /* ── Hijack the existing Save button ────────────────────────── */
-    // Remove old inline handler and replace with dialog opener
-    $('#saveBtn').off('click').on('click', function (e) {
-        e.stopPropagation();
-        openDialog();
-    });
-
-    /* ── Close triggers ─────────────────────────────────────────── */
-    $closeBtn.on('click', closeDialog);
-    $cancelBtn.on('click', closeDialog);
-    $backdrop.on('click', closeDialog);
-
-    // ESC key
-    $(document).on('keydown.saveDialog', function (e) {
-        if (e.key === 'Escape' && $dialog.hasClass('sdl-visible')) closeDialog();
-    });
-
-    /* ── Confirm Save ───────────────────────────────────────────── */
-    $saveBtn.on('click', function () {
-        const collection = $colSelect.val();
-        const name       = $reqName.val().trim() || 'New Request';
-        const method     = $('#methodSelect').val();
-        const url        = $('.url-input').val();
-        const body       = $('#codeArea').val();
-
-        if (!collection) {
-            // Shake the select to signal validation error
-            $colSelect.css('border-color', '#ef4444');
-            $colSelect[0].animate
-                ? $colSelect[0].animate(
-                    [{ transform:'translateX(-4px)' },{ transform:'translateX(4px)' },{ transform:'translateX(0)' }],
-                    { duration: 250, iterations: 2 }
-                  )
-                : null;
-            setTimeout(() => $colSelect.css('border-color', ''), 900);
-            return;
+        /* ── Populate collection dropdown from sidebar ───────────────── */
+        function populateCollections() {
+            $colSelect.find('option:not(:first)').remove();
+            $('.collection-folder .folder-header').each(function () {
+                const raw = $(this).clone();
+                raw.find('i').remove();             // strip the chevron icon text
+                const colID = raw.find('input').val();
+                raw.find('input').remove();
+                const name = raw.text().trim();
+                if (name) $colSelect.append($('<option>', { value: name, text: name, id: colID }));
+                console.log(colID)
+            });
         }
 
-        /* ── Find or create the target folder in the sidebar ────── */
-        let $targetFolder = null;
-        $('.collection-folder .folder-header').each(function () {
-            if ($(this).text().trim() === collection) {
-                $targetFolder = $(this).closest('.collection-folder');
-            }
+        /* ── Toggle "New Collection" panel ──────────────────────────── */
+        function openNewColPanel() {
+            $toggleBtn.addClass('sdl-open');
+            $newColPanel.addClass('sdl-panel-open');
+            setTimeout(() => $newColName.focus(), 200);
+        }
+
+        function closeNewColPanel() {
+            $toggleBtn.removeClass('sdl-open');
+            $newColPanel.removeClass('sdl-panel-open');
+            $newColName.val('');
+            $newColError.text('').removeClass('sdl-error-visible');
+        }
+
+        $toggleBtn.on('click', function () {
+            $newColPanel.hasClass('sdl-panel-open') ? closeNewColPanel() : openNewColPanel();
         });
 
-        if (!$targetFolder) {
-            // Collection no longer exists – create it
-            $targetFolder = $(`
+        /* ── Create new collection ───────────────────────────────────── */
+        function createCollection() {
+            const name = $newColName.val().trim();
+
+            if (!name) {
+                $newColError.text('Please enter a collection name.').addClass('sdl-error-visible');
+                $newColName.css('border-color', '#ef4444');
+                setTimeout(() => $newColName.css('border-color', ''), 900);
+                return;
+            }
+
+            // Check for duplicate name
+            let isDuplicate = false;
+            $colSelect.find('option').each(function () {
+                if ($(this).val().toLowerCase() === name.toLowerCase()) { isDuplicate = true; }
+            });
+
+            if (isDuplicate) {
+                $newColError.text('A collection with this name already exists.').addClass('sdl-error-visible');
+                $newColName.css('border-color', '#ef4444');
+                setTimeout(() => $newColName.css('border-color', ''), 900);
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("CreateNewCollection", "Request")',
+                type: 'POST',
+                data: {
+                    collectionName: name,
+                    UserId: 1 //Hardcoded
+                },
+                success: function (response) {
+                    console.log("S-Response: ", response);
+
+                    // ── Add to sidebar immediately ──────────────────────────── */
+                    const $newFolder = $(`
+                            <div class="collection-folder open">
+                                <div class="col-section-label folder-header">
+                                    <i class="bi bi-chevron-down folder-icon"></i> ${name}
+                                    <input type="hidden" value="${response.Data}" />
+                                </div>
+                                <div class="folder-body"></div>
+                            </div>
+                        `);
+                    $('.collection-list').append($newFolder);
+
+                    // ── Add to dropdown & auto-select it ─────────────────────── */
+                    const $newOption = $('<option>', { value: name, text: name, class: 'sdl-just-created', id: response.Data });
+                    $colSelect.append($newOption);
+                    $colSelect.val(name);
+
+                    // ── Visual feedback & collapse panel ─────────────────────── */
+                    $createColBtn
+                        .html('<i class="bi bi-check2"></i> Created!')
+                        .css({ background: 'rgba(16,185,129,.25)', borderColor: '#10b981', pointerEvents: 'none' });
+
+                    setTimeout(() => {
+                        $createColBtn
+                            .html('<i class="bi bi-plus"></i> Create')
+                            .css({ background: '', borderColor: '', pointerEvents: '' });
+                        closeNewColPanel();
+                    }, 900);
+                },
+                error: function (response) {
+                    console.log("E-Response: ", response);
+                }
+            })
+
+
+        }
+
+        $createColBtn.on('click', createCollection);
+
+        $newColName.on('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); createCollection(); }
+        });
+
+        // Clear error on input
+        $newColName.on('input', function () {
+            $newColError.text('').removeClass('sdl-error-visible');
+            $(this).css('border-color', '');
+        });
+
+        /* ── Open dialog ─────────────────────────────────────────────── */
+        function openDialog() {
+            populateCollections();
+            closeNewColPanel();
+
+            const activeItemName = $('.collection-item.active').text().trim();
+            const urlTail = $('.url-input').val().split('/').filter(Boolean).pop() || '';
+            $reqName.val(activeItemName || urlTail || '');
+
+            $backdrop.addClass('sdl-visible');
+            $dialog.addClass('sdl-visible');
+            setTimeout(() => $reqName.focus(), 240);
+        }
+
+        /* ── Close dialog ────────────────────────────────────────────── */
+        function closeDialog() {
+            $backdrop.removeClass('sdl-visible');
+            $dialog.removeClass('sdl-visible');
+            closeNewColPanel();
+            $saveBtn.removeClass('sdl-saved').html('<i class="bi bi-check2"></i> Save');
+        }
+
+        /* ── Wire existing Save button ───────────────────────────────── */
+        $('#saveBtn').off('click').on('click', function (e) {
+            e.stopPropagation();
+            openDialog();
+        });
+
+        /* ── Close triggers ──────────────────────────────────────────── */
+        $closeBtn.on('click', closeDialog);
+        $cancelBtn.on('click', closeDialog);
+        $backdrop.on('click', closeDialog);
+        $(document).on('keydown.saveDialog', function (e) {
+            if (e.key === 'Escape' && $dialog.hasClass('sdl-visible')) closeDialog();
+        });
+
+        /* ── Confirm Save (add request to chosen collection) ─────────── */
+        $saveBtn.on('click', function () {
+            const collection = $colSelect.val();
+            const name = $reqName.val().trim() || 'New Request';
+            const method = $('#methodSelect').val();
+            const url = $('.url-input').val();
+            const reqBody = editor ? editor.getValue() : ''
+
+            console.log(collection)
+
+            const newColName = $newColName.val().trim();
+
+            if (!collection) {
+                $colSelect.css('border-color', '#ef4444');
+                $colSelect[0].animate && $colSelect[0].animate(
+                    [{ transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }],
+                    { duration: 250, iterations: 2 }
+                );
+                setTimeout(() => $colSelect.css('border-color', ''), 900);
+                return;
+            }
+
+            /* Find folder in sidebar */
+            let collectionId = 0;
+
+            $('.collection-folder .folder-header').each(function () {
+                const $clone = $(this).clone();
+                $clone.find('i').remove();
+
+                if ($clone.text().trim() === collection) {
+                    $targetFolder = $(this).closest('.collection-folder');
+
+                    collectionId = $(this).find('input[type="hidden"]').val();
+
+                    console.log("CollectionId:", collectionId);
+                }
+            });
+
+            if (!$targetFolder) {
+                $targetFolder = $(`
                 <div class="collection-folder open">
                     <div class="col-section-label folder-header">
                         <i class="bi bi-chevron-down folder-icon"></i> ${collection}
+                        <input type="hidden" value="0"/>
                     </div>
                     <div class="folder-body"></div>
                 </div>
             `);
-            $('.collection-list').append($targetFolder);
-        }
+                $('.collection-list').append($targetFolder);
+            }
 
-        // Determine method label from the select text
-        const methodText = $('#methodSelect option:selected').text().trim();
+            const methodText = $('#methodSelect option:selected').text().trim();
+            const methodColorMap = {
+                'GET': 'var(--method-get)', 'POST': 'var(--method-post)',
+                'PUT': 'var(--method-put)', 'DELETE': 'var(--method-delete)'
+            };
+            const dotColor = methodColorMap[methodText] || 'var(--method-get)';
 
-        const methodColorMap = {
-            'GET'   : 'var(--method-get)',
-            'POST'  : 'var(--method-post)',
-            'PUT'   : 'var(--method-put)',
-            'DELETE': 'var(--method-delete)'
-        };
-        const dotColor = methodColorMap[methodText] || 'var(--method-get)';
+            // 1. Append UI
+            $targetFolder.find('.folder-body').append($(`
+                <div class="collection-item request-item"
+                     data-url="${url}"
+                     data-method-id="${method}"
+                     data-method="${methodText}">
+                    <div class="method-dot" style="background:${dotColor};"></div>
+                    ${name}
+                </div>
+            `));
 
-        const $newItem = $(`
-            <div class="collection-item request-item"
-                 data-url="${url}"
-                 data-method-id="${method}"
-                 data-method="${methodText}"
-                 data-body="">
-                <div class="method-dot" style="background:${dotColor};"></div>
-                ${name}
-            </div>
-        `);
+            // 2. THEN call API
+            $.ajax({
+                url: '@Url.Action("SaveRequestToCollection", "Request")',
+                type: 'POST',
+                data: {
+                    UserId: 1, // hardcoded
+                    MethodId: method,
+                    CollectionId: collectionId,
+                    RequestName: name,
+                    RequestURL: url,
+                    Body: reqBody,
+                    Response: '',
+                    StatusCode: 200
+                },
+                success: function (response) {
+                    console.log(response)
+                    location.reload();
+                }
+            });
 
-        $targetFolder.find('.folder-body').append($newItem);
+            $saveBtn.addClass('sdl-saved').html('<i class="bi bi-check2-all"></i> Saved!');
+            setTimeout(closeDialog, 900);
+        });
 
-        /* ── Success feedback ────────────────────────────────────── */
-        $saveBtn
-            .addClass('sdl-saved')
-            .html('<i class="bi bi-check2-all"></i> Saved!');
-
-        setTimeout(closeDialog, 900);
     });
-
-});</script>
+</script>

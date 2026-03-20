@@ -1,25 +1,38 @@
-﻿using System;
+﻿using CLapi.Models;
+using Dapper;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Web;
-using CLapi.Models;
-using Dapper;
 
 namespace CLapi.Models
 {
     public class CollectionModel
     {
         public int collectionId { get; set; }
+
+        [StringLength(100, ErrorMessage = "Collection name too long")]
         public string collectionName { get; set; }
+
+        [Required(ErrorMessage = "UserId is required")]
+        [Range(1, int.MaxValue, ErrorMessage = "Invalid UserId")]
         public int UserId { get; set; }
+
         public int reqId { get; set; }
+
         public string requestName { get; set; }
+
         public string requestURL { get; set; }
+
         public int statusCode { get; set; }
+
         public int methodId { get; set; }
+
         public string methodType { get; set; }
+
         public string body { get; set; }
     }
 

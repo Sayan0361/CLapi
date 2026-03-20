@@ -1,6 +1,6 @@
 ﻿@model CLapi.Models.Collection_MessageModel
 
-@{var groupedData = Model.collections.GroupBy(x => x.collectionName);}
+@{var groupedData = Model.collections.GroupBy(x => x.collectionId);}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -53,10 +53,12 @@
 
                 @foreach (var col in groupedData)
                 {
+                    var collectionName = col.First().collectionName;
                     <div class="collection-folder open">
 
                         <div class="col-section-label folder-header">
-                            <i class="bi bi-chevron-down folder-icon"></i> @col.Key
+                            <i class="bi bi-chevron-down folder-icon"></i> @collectionName
+                            <input type="hidden" value="@col.Key" />
                         </div>
 
                         <div class="folder-body">
@@ -200,6 +202,7 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
+        var editor;
         $(document).ready(function () {
             var data = @Html.Raw(Json.Encode(Model));
             var collections = data.collections;
@@ -233,7 +236,7 @@
             })
 
             /* ── Monaco Editor ── */
-            let editor;
+            
 
             require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
@@ -551,7 +554,7 @@
                         `);
                     }
                 });
-
+                
                 if (isMobile()) {
                     $bnavTabs.removeClass('active');
                     $('[data-panel="response"]').addClass('active');
