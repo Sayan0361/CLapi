@@ -93,7 +93,7 @@
 
             </div>
             <div class="d-flex ms-auto text-danger p-3">
-                    <i class="bi bi-box-arrow-right" id="logout_btn"></i>
+                <i class="bi bi-box-arrow-right" id="logout_btn"></i>
             </div>
 
         </aside>
@@ -107,7 +107,7 @@
                     <select class="method-select active" id="methodSelect" style="color: #10B981;">
                         @*options will go here*@
                     </select>
-                    <input type="text" class="url-input"
+                    <input type="text" class="url-input" id="urlInput"
                            placeholder="https://api.example.com/v1/endpoint">
                     <div class="url-actions">
                         <div class="btn-icon" id="copyBtn" title="Copy URL" style="width:30px;height:30px;"><i class="bi bi-copy" style="font-size:11px;"></i></div>
@@ -115,7 +115,8 @@
                     </div>
                 </div>
             </div>
-
+            <!--TOAST-->
+            <div id="toast" class="toast">Copied!</div>
             <div class="req-tabs">
                 <div class="req-tab active">Body<span class="tab-badge"></span></div>
                 <div class="req-tab">Headers</div>
@@ -168,7 +169,7 @@
                 <i class="bi bi-terminal" style="font-size:14px;color:var(--text-secondary);"></i>
                 <span class="resp-title">Response</span>
                 <div style="flex:1"></div>
-                <div class="btn-icon" title="Copy" style="width:30px;height:30px;"><i class="bi bi-copy" style="font-size:11px;"></i></div>
+                <div class="btn-icon" id="response-copy-btn" title="Copy" style="width:30px;height:30px;"><i class="bi bi-copy" style="font-size:11px;"></i></div>
                 <div class="btn-icon" title="Download" style="width:30px;height:30px;"><i class="bi bi-download" style="font-size:11px;"></i></div>
             </div>
             <div class="resp-tabs">
@@ -236,7 +237,7 @@
             })
 
             /* ── Monaco Editor ── */
-            
+
 
             require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
@@ -554,7 +555,7 @@
                         `);
                     }
                 });
-                
+
                 if (isMobile()) {
                     $bnavTabs.removeClass('active');
                     $('[data-panel="response"]').addClass('active');
@@ -672,6 +673,53 @@
                 },
                 error: function (r) { console.log('E: Methods:', r); }
             });
+
+            function showToast(message) {
+                const $toast = $('#toast');
+                console.log("Toaster on!");
+
+                const html = `
+                    <p>${message}
+                        <i class="bi bi-clipboard-check-fill"></i>
+                    </p>
+                `
+
+                //$toast.text(message).addClass('show');
+                $toast.html(html).addClass('show');
+
+                console.log($('#toast').attr('class'));
+
+
+                setTimeout(() => {
+                    $toast.removeClass('show');
+                }, 2000);
+            }
+
+            $('#copyBtn').on('click',function(){
+                    const copiedURL = $('#urlInput').val();
+                    console.log('CopiedURL: ', copiedURL)
+                    
+                    navigator.clipboard.writeText(copiedURL)
+                        .then(() => {
+                            showToast("URL Copied to Clipboard!");
+                        })
+                        .catch(err => {
+                            console.error("Copy Failed: ", err);
+                        })
+            })
+
+            $('#response-copy-btn').on('click',function(){
+                    const copiedURL = $('#respBody').text();
+                    console.log('respBody: ', copiedURL)
+                    
+                    navigator.clipboard.writeText(copiedURL)
+                        .then(() => {
+                            showToast("Response Copied to Clipboard!");
+                        })
+                        .catch(err => {
+                            console.error("Copy Failed: ", err);
+                        })
+            })
 
         });
     </script>

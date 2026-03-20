@@ -1,4 +1,32 @@
-﻿.key {
+﻿.toast {
+    position: fixed;
+    width : 25%;
+    bottom: 32px;
+    left: 85%;
+    transform: translateX(-50%) scale(0.95);
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(8px);
+    color: #10b981;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 999999;
+}
+
+    .toast.show {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+    }
+
+
+.key {
     color: #6b9de8;
 }
 
@@ -980,3 +1008,6 @@ body.dragging {
 #respBody .number  { color: #FB923C; }
 #respBody .boolean { color: #F472B6; }
 #respBody .null    { color: #94A3B8; }
+
+
+
