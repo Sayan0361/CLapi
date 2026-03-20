@@ -16,7 +16,7 @@
     <AssemblyName>CLapi</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44319</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
@@ -222,6 +222,7 @@
     <Content Include="SP\InsertTestData.sql" />
     <Content Include="SP\sp_AddOrEditCollection.sql" />
     <Content Include="SP\sp_CreateTables.sql" />
+    <Content Include="SP\sp_DeleteCollectionById.sql" />
     <Content Include="SP\sp_GetAllCollectionsRequestsByUserID.sql" />
     <Content Include="SP\sp_getAllMethods.sql" />
     <Content Include="SP\sp_UpsertResponse.sql" />
