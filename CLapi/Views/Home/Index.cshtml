@@ -110,8 +110,8 @@
                     <input type="text" class="url-input"
                            placeholder="https://api.example.com/v1/endpoint">
                     <div class="url-actions">
-                        <div class="btn-icon" title="Copy URL" style="width:30px;height:30px;"><i class="bi bi-copy" style="font-size:11px;"></i></div>
-                        <div class="btn-icon" title="Params" style="width:30px;height:30px;"><i class="bi bi-sliders" style="font-size:11px;"></i></div>
+                        <div class="btn-icon" id="copyBtn" title="Copy URL" style="width:30px;height:30px;"><i class="bi bi-copy" style="font-size:11px;"></i></div>
+                        <div class="btn-icon" id="paramsBtn" title="Params" style="width:30px;height:30px;"><i class="bi bi-sliders" style="font-size:11px;"></i></div>
                     </div>
                 </div>
             </div>
@@ -437,7 +437,7 @@
                         RequestURL: $reqUrl.val(),
                         Body:       bodyVal,
                         MethodId:   parseInt($methodSelect.val()),
-                        UserId:     2,
+                        UserId:     localStorage.getItem("UserId"),
                         CollectionId: 1,
                         StatusCode: 200
                     },

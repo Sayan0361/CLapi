@@ -671,7 +671,7 @@
                 type: 'POST',
                 data: {
                     collectionName: name,
-                    UserId: 1 //Hardcoded
+                    UserId: localStorage.getItem("UserId")
                 },
                 success: function (response) {
                     console.log("S-Response: ", response);
@@ -835,7 +835,7 @@
                 url: '@Url.Action("SaveRequestToCollection", "Request")',
                 type: 'POST',
                 data: {
-                    UserId: 1, // hardcoded
+                    UserId: localStorage.getItem("UserId"),
                     MethodId: method,
                     CollectionId: collectionId,
                     RequestName: name,
