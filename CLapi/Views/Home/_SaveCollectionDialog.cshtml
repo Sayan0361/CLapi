@@ -671,7 +671,11 @@
                 type: 'POST',
                 data: {
                     collectionName: name,
+<<<<<<< Updated upstream
                     UserId: localStorage.getItem("UserId")
+=======
+                    UserId: 1 //Hardcoded
+>>>>>>> Stashed changes
                 },
                 success: function (response) {
                     console.log("S-Response: ", response);
@@ -835,7 +839,11 @@
                 url: '@Url.Action("SaveRequestToCollection", "Request")',
                 type: 'POST',
                 data: {
+<<<<<<< Updated upstream
                     UserId: localStorage.getItem("UserId"),
+=======
+                    UserId: 1, // hardcoded
+>>>>>>> Stashed changes
                     MethodId: method,
                     CollectionId: collectionId,
                     RequestName: name,
