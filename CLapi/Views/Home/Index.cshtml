@@ -653,7 +653,7 @@
                         Body:         bodyVal,
                         MethodId:     methodId,
                         CollectionId: 1,
-                        UserId:       2,
+                        UserId: localStorage.getItem("UserId"),
                         RequestName:  url.split('/').pop() || 'New Request',
                         StatusCode:   200
                     },

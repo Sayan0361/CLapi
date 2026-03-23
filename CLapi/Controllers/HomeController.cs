@@ -26,8 +26,7 @@ namespace CLapi.Controllers
             }
 
             CollectionDAL dal = new CollectionDAL();
-            var details = dal.getDetails(1); //hardcoded
-
+            var details = dal.getDetails(id.Value); 
             return View(details);
         }
 
