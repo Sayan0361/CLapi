@@ -3,6 +3,7 @@ using CLapi.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -126,6 +127,14 @@ namespace CLapi.Controllers
                 collection.UserId
             );
 
+            return Json(response);
+        }
+
+        [HttpPost]
+        public JsonResult DeleteCollection(int userId, int collectionId)
+        {
+            CollectionDAL collectionDAL = new CollectionDAL();
+            var response = collectionDAL.deleteCollection(userId,collectionId);
             return Json(response);
         }
     }

@@ -1,7 +1,9 @@
 ﻿using CLapi.Models;
 using Dapper;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Drawing;
@@ -81,6 +83,20 @@ namespace CLapi.DAL
                 collections = result.Item2
 
             };
+        }
+
+        public DBResponseModel<int> deleteCollection(int userId, int collectionId)
+        {
+            var proc = "sp_DeleteCollectionById";
+
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("@collectionId", collectionId);
+            parameters.Add("@userId", userId);
+
+            return _conn.ExecuteSingle<DBResponseModel<int>>(
+                proc,
+                parameters
+            );
         }
     }
 }
