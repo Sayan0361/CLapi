@@ -1,6 +1,6 @@
 ﻿@model CLapi.Models.Collection_MessageModel
 
-@{var groupedData = Model.collections.GroupBy(x => x.collectionName);}
+@{var groupedData = Model.collections.GroupBy(x => x.collectionId);}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -97,7 +97,7 @@
         <main id="mainPanel">
 
             <div class="request-header">
-                <div class="section-label">Request</div>
+                @*<div class="section-label">Request</div>*@
                 <div class="url-bar">
                     <select class="method-select active" id="methodSelect" style="color: #10B981;">
                         @*options will go here*@
@@ -643,72 +643,6 @@
                 const $btn = $(this);
                 $btn.prop('disabled', true)
                     .html('<i class="bi bi-hourglass-split"></i> Saving...');
-
-                $.ajax({
-                    url: '@Url.Action("SaveRequest", "Request")',
-                    type: 'POST',
-                    contentType: 'application/x-www-form-urlencoded',
-                    data: {
-                        RequestURL:   url,
-                        Body:         bodyVal,
-                        MethodId:     methodId,
-                        CollectionId: 1,
-                        UserId: localStorage.getItem("UserId"),
-                        RequestName:  url.split('/').pop() || 'New Request',
-                        StatusCode:   200
-                    },
-                    success: function (response) {
-                        console.log('Saved:', response);
-
-                        // Add item to sidebar DOM
-                        const name       = url.split('/').pop() || 'New Request';
-                        const methodName = $methodSelect.find('option:selected').text();
-                        const dotColor   = methodIdToColor(methodId);
-
-                        const $item = $(`
-                            <div class="collection-item request-item"
-                                 data-url="${url}"
-                                 data-method-id="${methodId}"
-                                 data-method="${methodName}"
-                                 data-body="${bodyVal.replace(/"/g, '&quot;')}">
-                                <div class="method-dot" style="background:${dotColor}"></div>
-                                ${name}
-                            </div>
-                        `);
-
-                        // Append to first folder, or create a new one
-                        let $target = $('.folder-body').first();
-                        if ($target.length === 0) {
-                            const $newFolder = $(`
-                                <div class="collection-folder open">
-                                    <div class="col-section-label folder-header">
-                                        <i class="bi bi-chevron-down folder-icon"></i> My Collection
-                                    </div>
-                                    <div class="folder-body"></div>
-                                </div>
-                            `);
-                            $('.collection-list').append($newFolder);
-                            $target = $newFolder.find('.folder-body');
-                        }
-                        $target.append($item);
-
-                        $btn.css({ background:'rgba(16,185,129,0.15)', borderColor:'#10b981', color:'#10b981' })
-                            .html('<i class="bi bi-check2"></i> Saved!');
-                    },
-                    error: function (xhr) {
-                        console.log('Save failed:', xhr);
-
-                        $btn.css({ background:'rgba(239,68,68,0.15)', borderColor:'#ef4444', color:'#ef4444' })
-                            .html('<i class="bi bi-x"></i> Failed');
-                    },
-                    complete: function () {
-                        setTimeout(() => {
-                            $btn.prop('disabled', false)
-                                .attr('style', '')
-                                .html('<i class="bi bi-bookmark-plus"></i><span class="save-label"> Save to Collection</span>');
-                        }, 1800);
-                    }
-                });
             });
 
             /* ── Resize reset ── */
@@ -786,10 +720,10 @@
                 URL.revokeObjectURL(url);
             }
 
-            $('#copyBtn').on('click',function(){
+                $('#copyBtn').on('click', function () {
                     const copiedURL = $('#urlInput').val();
                     console.log('CopiedURL: ', copiedURL)
-                    
+
                     navigator.clipboard.writeText(copiedURL)
                         .then(() => {
                             showToast("URL Copied to Clipboard!");
@@ -797,12 +731,12 @@
                         .catch(err => {
                             console.error("Copy Failed: ", err);
                         })
-            })
+                });
 
-            $('#response-copy-btn').on('click',function(){
+                $('#response-copy-btn').on('click', function () {
                     const responseBody = $('#respBody').text();
                     console.log('respBody: ', responseBody)
-                    
+
                     navigator.clipboard.writeText(responseBody)
                         .then(() => {
                             showToast("Response Copied to Clipboard!");
@@ -810,13 +744,13 @@
                         .catch(err => {
                             console.error("Copy Failed: ", err);
                         })
-            })
+                });
 
-            $('#export-response').on('click',function(){
+                $('#export-response').on('click', function () {
                     const responseBody = lastResponse;
-                    
+
                     exportResponseToJSON(responseBody.Body)
-            })
+                });
 
         });
     </script>

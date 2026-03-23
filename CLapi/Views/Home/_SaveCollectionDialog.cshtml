@@ -671,6 +671,7 @@
                 type: 'POST',
                 data: {
                     collectionName: name,
+
                     UserId: localStorage.getItem("UserId")
                 },
                 success: function (response) {
@@ -846,7 +847,7 @@
                 },
                 success: function (response) {
                     console.log(response)
-                    location.reload();
+                    //location.reload();
                 }
             });
 
