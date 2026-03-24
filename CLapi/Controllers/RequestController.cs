@@ -137,5 +137,13 @@ namespace CLapi.Controllers
             var response = collectionDAL.deleteCollection(userId,collectionId);
             return Json(response);
         }
+
+        [HttpPost]
+        public JsonResult DeleteRequest(int userId, int reqId, int collectionId)
+        {
+            RequestDAL requestDAL = new RequestDAL();
+            var response = requestDAL.DeleteRequest(userId, reqId, collectionId);
+            return Json(response);
+        }
     }
 }

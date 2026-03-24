@@ -97,5 +97,19 @@ namespace CLapi.DAL
                 param
             );
         }
+
+        public DBResponseModel<int> DeleteRequest(int userId, int reqId, int collectionId)
+        {
+            var proc = "sp_DeleteRequest";
+            var param = new DynamicParameters();
+            param.Add("@userId", userId);
+            param.Add("@reqId", reqId);
+            param.Add("@collectionId", collectionId);
+
+            return _conn.ExecuteSingle<DBResponseModel<int>>(
+                proc,
+                param
+            );
+        }
     }
 }

@@ -223,6 +223,7 @@
     <Content Include="SP\sp_AddOrEditCollection.sql" />
     <Content Include="SP\sp_CreateTables.sql" />
     <Content Include="SP\sp_DeleteCollectionById.sql" />
+    <Content Include="SP\sp_DeleteRequest.sql" />
     <Content Include="SP\sp_GetAllCollectionsRequestsByUserID.sql" />
     <Content Include="SP\sp_getAllMethods.sql" />
     <Content Include="SP\sp_UpsertResponse.sql" />
