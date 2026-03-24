@@ -1009,5 +1009,26 @@ body.dragging {
 #respBody .boolean { color: #F472B6; }
 #respBody .null    { color: #94A3B8; }
 
+.trash-container {
+    /* Pushes the trash icon to the far right of the flex container */
+    margin-left: auto;
+    /* Defines a transparent border so your hover effect has something to apply to */
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    padding: 4px 6px;
+    /* Sets the default color and smooths out the hover animation */
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-
+/* 2. Update your hover state */
+.trash-container {
+    border: 1px solid transparent; /* Prevents layout shifting */
+    border-radius: var(--radius);
+    padding: 4px 6px;
+    margin-left: auto; /* Pushes it to the right */
+    transition: all 0.15s ease; /* Makes the jQuery scale/color transition smooth */
+}

@@ -53,7 +53,13 @@
                     var collectionName = col.First().collectionName;
                     <div class="collection-folder open">
                         <div class="col-section-label folder-header">
-                            <i class="bi bi-chevron-down folder-icon"></i> @collectionName
+                            <i class="bi bi-chevron-down folder-icon"></i>
+                            <span class="folder-name">@collectionName</span>
+
+                            <div class="trash-container">
+                                <i class="bi bi-trash3" id="trash-btn"></i>
+                            </div>
+
                             <input type="hidden" value="@col.Key" />
                         </div>
 
@@ -232,6 +238,27 @@
                     });
                 }
             );
+
+            $(".trash-container").hover(
+                function () {
+                    $(this).css({
+                        "color": "var(--danger)",
+                        "transform": "scale(1.1)",
+                        "cursor": "pointer",
+                        "opacity": "1" // Keeps it bright and visible
+                    });
+                },
+                function () {
+                    // Mouse Leave (Default state)
+                    $(this).css({
+                        "color": "var(--text-muted)",
+                        "background": "transparent",
+                        "transform": "scale(1)",
+                        "opacity": "1"
+                    });
+                }
+            );
+
             $("#logout_btn").on('click',function(){
                 localStorage.clear();
                 window.location.href = '@Url.Action("LogIn","Auth")';
