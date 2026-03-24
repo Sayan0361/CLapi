@@ -1,11 +1,11 @@
 ﻿USE [CLapiDB]
 GO
-/****** Object:  StoredProcedure [dbo].[sp_DeleteCollectionById]    Script Date: 3/20/2026 10:16:30 AM ******/
+/****** Object:  StoredProcedure [dbo].[sp_DeleteCollectionById]    Script Date: 3/24/2026 10:27:59 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE OR ALTER   PROCEDURE [dbo].[sp_DeleteCollectionById]
+ALTER   PROCEDURE [dbo].[sp_DeleteCollectionById]
 (
     @userId INT,
     @collectionId INT
@@ -59,6 +59,13 @@ BEGIN
 
 			DELETE FROM dbo.tbl_Collections
 			WHERE collectionId = @collectionId;
+
+			-- Delete orphan requests after deleting mapping
+			DELETE R
+			FROM dbo.tbl_Request R
+			LEFT JOIN dbo.tbl_CollectionRequests CR 
+				ON R.reqId = CR.reqId
+			WHERE CR.reqId IS NULL;
 
 			SELECT
 				1 AS Success,
