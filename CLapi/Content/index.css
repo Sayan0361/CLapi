@@ -1032,3 +1032,8 @@ body.dragging {
     margin-left: auto; /* Pushes it to the right */
     transition: all 0.15s ease; /* Makes the jQuery scale/color transition smooth */
 }
+
+
+#trash-btn {
+   
+}

@@ -55,40 +55,45 @@
                         <div class="col-section-label folder-header">
                             <i class="bi bi-chevron-down folder-icon"></i>
                             <span class="folder-name">@collectionName</span>
-
+                            
                             <div class="trash-container">
-                                <i class="bi bi-trash3" id="trash-btn"></i>
+                                <i class="bi bi-folder-x" id="trash-btn" style=" font-size: 17px;"></i>
                             </div>
                             <input type="hidden" class="col-val" value="@col.Key" />
 
                         </div>
 
-                        <div class="folder-body">
-                            @foreach (var req in col)
-                            {
-                                <div class="collection-item request-item"
-                                     data-id="@req.reqId"
-                                     data-name="@req.requestName"
-                                     data-url="@req.requestURL"
-                                     data-method-id="@req.methodId"
-                                     data-method="@req.methodType"
-                                     data-status="@req.statusCode"
-                                     data-body="@req.body">
+                            <div class="folder-body">
 
-                                    <div class="method-dot"
-                                         style="background:
-                                @(req.methodType == "GET" ? "var(--method-get)" :
-                                  req.methodType == "POST" ? "var(--method-post)" :
-                                  req.methodType == "PUT" ? "var(--method-put)" :
-                                  "var(--method-delete)")">
+                                @foreach (var req in col.Where(r => r.reqId != 0))
+                                {
+                                    <div class="collection-item request-item"
+                                         data-id="@req.reqId"
+                                         data-name="@req.requestName"
+                                         data-url="@req.requestURL"
+                                         data-method-id="@req.methodId"
+                                         data-method="@req.methodType"
+                                         data-status="@req.statusCode"
+                                         data-body="@req.body">
+
+
+                                        <div class="method-dot"
+                                             style="background:
+                                    @(req.methodType == "GET" ? "var(--method-get)" :
+                                      req.methodType == "POST" ? "var(--method-post)" :
+                                      req.methodType == "PUT" ? "var(--method-put)" :
+                                      "var(--method-delete)")">
+                                        </div>
+
+                                        @req.requestName
+
+                                        <div class="trash-container-request">
+                                            <i class="bi bi-trash3" id="trash-btn-request" style=" font-size: 10px;"></i>
+                                        </div>
+
                                     </div>
-
-                                    @req.requestName
-
-                                </div>
-                            }
-                        </div>
-
+                                }
+                            </div>
                     </div>
 
                 }
@@ -219,7 +224,7 @@
                 type: 'GET',
                 data: { UserId: userId },
                 success: function (res) {
-                    // do nothing 
+                    // do nothing
                 }
             });
 
@@ -286,6 +291,45 @@
                     }
                 })
             })
+
+            // Delete Request from collection
+            $(document).on('click', '.trash-container-request', function () {
+                const $btn = $(this);
+                const $requestItem = $btn.closest('.collection-item');
+
+                const deleteRequestID = $requestItem.data("id");
+                const deleteCollectionID = $requestItem
+                    .closest('.collection-folder')
+                    .find(".col-val")
+                    .val();
+
+                console.log(deleteRequestID, deleteCollectionID);
+
+                $btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("DeleteRequest", "Request")',
+                    type: 'POST',
+                    data: {
+                        userId: userId,
+                        reqId: deleteRequestID,
+                        collectionId: deleteCollectionID
+                    },
+                    success: function (response) {
+                        console.log("S-Response:", response);
+
+                        // Remove item instead of reload
+                        $requestItem.remove();
+                    },
+                    error: function (response) {
+                        console.log("E-Response:", response);
+                        alert("Failed to delete request");
+                    },
+                    complete: function () {
+                        $btn.prop('disabled', false);
+                    }
+                });
+            });
 
             /* ── Monaco Editor ── */
             require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
@@ -512,7 +556,7 @@
             if (isHtml) {
                 // Render HTML in an iframe so it visually looks like a web page
                 let safeHtml = rawStr.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
-                
+
                 $('#respBody').empty().html(`
                     <div style="width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;">
                         <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;">
