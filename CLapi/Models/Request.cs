@@ -81,16 +81,17 @@ namespace CLapi.DAL
             var proc = "sp_UpsertResponse";
             var param = new DynamicParameters();
 
-            param.Add("@UserId", request.UserId);
-            param.Add("@MethodId", request.MethodId);
+            param.Add("@userId", request.UserId);
+            param.Add("@reqId", request.ReqId);
 
-            param.Add("@CollectionId", request.CollectionId);
-            param.Add("@RequestName", request.GetRequestName());
+            param.Add("@methodId", request.MethodId);
+            param.Add("@collectionId", request.CollectionId);
+            param.Add("@requestName", request.GetRequestName());
 
-            param.Add("@RequestURL", request.RequestURL);
-            param.Add("@Body", request.Body);
-            param.Add("@Response", request.Response);
-            param.Add("@StatusCode", request.StatusCode);
+            param.Add("@requestURL", request.RequestURL);
+            param.Add("@body", request.Body);
+            param.Add("@response", request.Response);
+            param.Add("@statusCode", request.StatusCode);
 
             return _conn.ExecuteSingle<DBResponseModel<int>>(
                 proc,
