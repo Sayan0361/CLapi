@@ -59,8 +59,8 @@
                             <div class="trash-container">
                                 <i class="bi bi-trash3" id="trash-btn"></i>
                             </div>
+                            <input type="hidden" class="col-val" value="@col.Key" />
 
-                            <input type="hidden" value="@col.Key" />
                         </div>
 
                         <div class="folder-body">
@@ -262,6 +262,29 @@
             $("#logout_btn").on('click',function(){
                 localStorage.clear();
                 window.location.href = '@Url.Action("LogIn","Auth")';
+            })
+
+            //Delete Collection
+            $(".col-section-label .trash-container").on('click', function(){
+                const deleteCollectionID = $(this).parent().find(".col-val").val();
+                console.log(deleteCollectionID);
+
+                $.ajax({
+                    url: '@Url.Action("DeleteCollection", "Request")',
+                    type: 'POST',
+                    data: {
+                        userId: userId,
+                        collectionId: deleteCollectionID
+                    },
+                    success: function (response) {
+                        console.log("S-Response: ", response);
+                        location.reload();
+                    },
+                    error: function (response) {
+                        console.log("E-Response: ", response);
+
+                    }
+                })
             })
 
             /* ── Monaco Editor ── */
