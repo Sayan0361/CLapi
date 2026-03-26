@@ -1,6 +1,6 @@
 ﻿USE [CLapiDB]
 GO
-/****** Object:  StoredProcedure [dbo].[sp_UpsertResponse]    Script Date: 3/26/2026 9:25:22 AM ******/
+/****** Object:  StoredProcedure [dbo].[sp_UpsertResponse]    Script Date: 3/26/2026 10:39:42 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -15,7 +15,7 @@ GO
 ALTER PROC [dbo].[sp_UpsertResponse]
 (
     @userId INT,
-    @reqId INT = NULL,
+    @reqId INT = 0,
     @methodId INT,
     @collectionId INT, 
     @requestName VARCHAR(100) = 'New Request',
@@ -52,7 +52,7 @@ BEGIN
         BEGIN TRAN;
 
         -- Edit existing request
-        IF @reqId IS NOT NULL
+        IF @reqId <> 0
         BEGIN
             -- Update request
             UPDATE dbo.tbl_Request
