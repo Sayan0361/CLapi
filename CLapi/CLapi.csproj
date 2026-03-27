@@ -226,14 +226,11 @@
     <Content Include="SP\sp_DeleteRequest.sql" />
     <Content Include="SP\sp_GetAllCollectionsRequestsByUserID.sql" />
     <Content Include="SP\sp_getAllMethods.sql" />
-    <Content Include="SP\sp_InsertEnvById.sql" />
+    <Content Include="SP\sp_GetEnvDetails.sql" />
     <Content Include="SP\sp_UpsertResponse.sql" />
     <Content Include="SP\sp_CreateTables.sql" />
     <Content Include="SP\sp_LogIn.sql" />
     <Content Include="SP\sp_SignUp.sql" />
-    <Content Include="Content\Templates\cURL.txt" />
-    <Content Include="Content\Templates\Javascript.txt" />
-    <Content Include="Content\Templates\Python.txt" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
