@@ -88,4 +88,20 @@ BEGIN
         ('PUT'),
         ('DELETE');
 
+    -- Environment Table
+    CREATE TABLE tbl_Environment (
+	    envId INT IDENTITY PRIMARY KEY,
+
+	    variableKey NVARCHAR(200) NOT NULL, -- unique
+        variableValue NVARCHAR(MAX) NOT NULL, 
+
+	    userId INT NOT NULL,
+	    collectionId INT NULL, -- NULL means Global
+	
+	    scope NVARCHAR(20) NOT NULL, -- 'GLOBAL' or 'COLLECTION'
+
+	    FOREIGN KEY (userId) REFERENCES tbl_Users(userId),
+	    FOREIGN KEY (collectionId) REFERENCES tbl_Collections(collectionId)
+    );
+
 END;
