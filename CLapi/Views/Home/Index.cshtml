@@ -159,6 +159,11 @@
                     <i class="bi bi-bookmark-plus"></i>
                     <span class="save-label">Save to Collection</span>
                 </button>
+                <button class="btn-outline d-none" id="generateBtn">
+                    <i class="bi bi-code-square"></i>
+                    <span class="save-label">Generate Code</span>
+                </button>
+                
                 <div class="action-spacer"></div>
                 <div class="action-bar-extra" style="display:flex;gap:6px;align-items:center;">
                     <div class="btn-icon" title="Environment"><i class="bi bi-globe2"></i></div>
@@ -863,7 +868,7 @@
 
                         const html = `
                             <div class="custom-select">
-                                <div class="select-selected">Javascript</div>
+                                <div class="select-selected">Language</div>
                                 <div class="select-options"></div>
                             </div>
                         `;
@@ -883,9 +888,12 @@
                         `);
                     });
 
+                    $('#generateBtn').removeClass('d-none');
+
                 } else {
                     // Remove dropdown completely
                     $(".lang-options").empty();
+                    $('#generateBtn').addClass('d-none');
                 }
             }
 
@@ -944,6 +952,114 @@
                 $(".custom-select").removeClass("open");
             });
 
+            // Load the templates from txt files
+            function loadTemplates(type, cbk) {
+                console.log(type)
+                $.get(
+                    `/Clapi/Content/Templates/${type}.txt`,
+                    function(template){
+                        cbk(template)
+                    }
+                )
+            }
+
+            function renderTemplates(template, data) {
+                return template
+                    .replace(/{{method}}/g, data.method)
+                    .replace(/{{method_lower}}/g, data.method.toLowerCase())
+                    .replace(/{{url}}/g, data.url)
+                    .replace(/{{headers}}/g, data.headers)
+                    .replace(/{{body}}/g, data.body)
+            }
+
+            function prepareData(req) {
+                let bodyData;
+
+                try {
+                    // If already JSON string → parse first
+                    bodyData = typeof req.body === "string"
+                        ? JSON.parse(req.body)
+                        : req.body;
+                } catch {
+                    bodyData = req.body;
+                }
+
+                return {
+                    method: req.method,
+                    url: req.url,
+                    headers: JSON.stringify(req.headers, null, 2),
+                    body: JSON.stringify(bodyData, null, 2)
+                };
+            }
+
+            function formatCurlHeaders(headers) {
+                return Object.entries(headers)
+                    .map(([k, v]) => `-H "${k}: ${v}" \\`)
+                    .join("\n");
+            }
+
+            function setEditorLanguage(type) {
+                let lang = "plaintext";
+
+                if (type === "Javascript") lang = "javascript";
+                else if (type === "Python") lang = "python";
+                else if (type === "cURL") lang = "shell";
+
+                monaco.editor.setModelLanguage(editor.getModel(), lang);
+            }
+
+            function generateCode(type, req) {
+                loadTemplates(type, function (template) {
+
+                    const data = prepareData(req)
+
+                    if (type == "cURL") {
+                        data.headers = formatCurlHeaders(req.headers)
+                        data.body = `-d '${JSON.stringify(req.body)}'`
+                    }
+
+                    const finalCode = renderTemplates(template, data)
+                    console.log(finalCode)
+
+                    const formattedCode = finalCode
+                        .replace(/\\n/g, '\n')
+                        .replace(/\\t/g, '\t');
+
+                    if (editor) {
+                        
+                        editor.setValue(formattedCode)
+
+                        // Optional: change language mode
+                        setEditorLanguage(type)
+                    }
+                })
+            }
+
+            $("#generateBtn").click(function () {
+                const langType = $(".select-selected").text().trim();
+                console.log("Type in click: ", langType)
+
+                const methodTypeId = $methodSelect.val()
+                const methodType = $methodSelect.find(`[value="${methodTypeId}"]`).text()
+                console.log("Method Type: ", methodType)
+
+                const url = $reqUrl.val().trim();
+                console.log("URL: ", url)
+
+                const bodyVal = editor ? editor.getValue() : '';
+                console.log("bodyVal: ", bodyVal)
+
+                const request = {
+                    method: methodType,
+                    url: url,
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: bodyVal
+                };
+
+                generateCode(langType, request);
+            });
         });
     </script>
 

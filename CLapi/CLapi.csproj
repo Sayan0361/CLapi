@@ -16,7 +16,7 @@
     <AssemblyName>CLapi</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>true</UseIISExpress>
+    <UseIISExpress>false</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44319</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
@@ -230,6 +230,9 @@
     <Content Include="SP\sp_CreateTables.sql" />
     <Content Include="SP\sp_LogIn.sql" />
     <Content Include="SP\sp_SignUp.sql" />
+    <Content Include="Content\Templates\cURL.txt" />
+    <Content Include="Content\Templates\Javascript.txt" />
+    <Content Include="Content\Templates\Python.txt" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
