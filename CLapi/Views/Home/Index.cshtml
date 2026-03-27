@@ -133,8 +133,12 @@
 
             <div class="body-editor-wrap">
                 <div class="editor-toolbar">
-                    <span class="editor-lang">JSON</span>
+                    <span class="editor-lang active" value="JSON">JSON</span>
+                    <span class="editor-lang" value="Generate-Code">Generate Code</span>
                     <div style="flex:1"></div>
+                    <div class="lang-options">
+                        <!--Dynamically insert language options-->
+                    </div>
                     <div class="btn-icon" title="Format" style="width:30px;height:30px;"><i class="bi bi-braces" style="font-size:11px;"></i></div>
                     <div class="btn-icon" title="Clear" style="width:30px;height:30px;"><i class="bi bi-trash3" style="font-size:11px;"></i></div>
                 </div>
@@ -814,37 +818,131 @@
                 URL.revokeObjectURL(url);
             }
 
-                $('#copyBtn').on('click', function () {
-                    const copiedURL = $('#urlInput').val();
-                    console.log('CopiedURL: ', copiedURL)
+            $('#copyBtn').on('click', function () {
+                const copiedURL = $('#urlInput').val();
+                console.log('CopiedURL: ', copiedURL)
 
-                    navigator.clipboard.writeText(copiedURL)
-                        .then(() => {
-                            showToast("URL Copied to Clipboard!");
-                        })
-                        .catch(err => {
-                            console.error("Copy Failed: ", err);
-                        })
-                });
+                navigator.clipboard.writeText(copiedURL)
+                    .then(() => {
+                        showToast("URL Copied to Clipboard!");
+                    })
+                    .catch(err => {
+                        console.error("Copy Failed: ", err);
+                    })
+            });
 
-                $('#response-copy-btn').on('click', function () {
-                    const responseBody = $('#respBody').text();
-                    console.log('respBody: ', responseBody)
+            $('#response-copy-btn').on('click', function () {
+                const responseBody = $('#respBody').text();
+                console.log('respBody: ', responseBody)
 
-                    navigator.clipboard.writeText(responseBody)
-                        .then(() => {
-                            showToast("Response Copied to Clipboard!");
-                        })
-                        .catch(err => {
-                            console.error("Copy Failed: ", err);
-                        })
-                });
+                navigator.clipboard.writeText(responseBody)
+                    .then(() => {
+                        showToast("Response Copied to Clipboard!");
+                    })
+                    .catch(err => {
+                        console.error("Copy Failed: ", err);
+                    })
+            });
 
-                $('#export-response').on('click', function () {
+            $('#export-response').on('click', function () {
                     const responseBody = lastResponse;
 
                     exportResponseToJSON(responseBody.Body)
-                });
+            });
+
+
+            // HANDLE MODE SWITCH (JSON / Generate Code)
+            function handleEditorMode(activeLang) {
+
+                const languageOptions = ['Javascript', 'Python', 'cURL'];
+
+                if (activeLang === "Generate-Code") {
+
+                    // Create dropdown if not exists
+                    if ($(".custom-select").length === 0) {
+
+                        const html = `
+                            <div class="custom-select">
+                                <div class="select-selected">Javascript</div>
+                                <div class="select-options"></div>
+                            </div>
+                        `;
+
+                        $(".lang-options").html(html);
+                    }
+
+                    // Populate options
+                    const $options = $(".select-options");
+                    $options.empty();
+
+                    languageOptions.forEach((lang, index) => {
+                        $options.append(`
+                            <div data-value="${lang}" class="${index === 0 ? 'active' : ''}">
+                                ${lang}
+                            </div>
+                        `);
+                    });
+
+                } else {
+                    // Remove dropdown completely
+                    $(".lang-options").empty();
+                }
+            }
+
+
+            // TOGGLE JSON / GENERATE CODE
+            $(document).on("click", ".editor-lang", function () {
+
+                //Remove existing active class
+                $(".editor-lang").removeClass("active");
+                // add active class
+                $(this).addClass("active");
+
+                //selected tab
+                const activeLang = $(this).attr("value");
+
+                console.log("Mode:", activeLang);
+
+                handleEditorMode(activeLang);
+            });
+
+
+            // DROPDOWN TOGGLE
+            $(document).on("click", ".select-selected", function (e) {
+
+                e.stopPropagation();
+
+                const parent = $(this).parent();
+
+                $(".custom-select").not(parent).removeClass("open");
+                parent.toggleClass("open");
+            });
+
+
+            // Select Option
+            $(document).on("click", ".select-options div", function () {
+
+                const value = $(this).data("value");
+                const text = $(this).text();
+
+                const parent = $(this).closest(".custom-select");
+
+                parent.find(".select-selected").text(text);
+                parent.removeClass("open");
+
+                parent.find(".select-options div").removeClass("active");
+                $(this).addClass("active");
+
+                console.log("Selected:", value);
+
+                // Later: trigger code generation here
+            });
+
+
+            // CLOSE DROPDOWN ON OUTSIDE CLICK
+            $(document).on("click", function () {
+                $(".custom-select").removeClass("open");
+            });
 
         });
     </script>

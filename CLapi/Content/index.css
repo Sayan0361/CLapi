@@ -1033,7 +1033,82 @@ body.dragging {
     transition: all 0.15s ease; /* Makes the jQuery scale/color transition smooth */
 }
 
-
-#trash-btn {
-   
+.editor-lang{
+    cursor: pointer;
 }
+
+.editor-lang.active {
+    background: #007bff;
+    color: white;
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+.custom-select {
+    position: relative;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Selected box */
+.select-selected {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    min-width: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.15s ease;
+}
+
+    .select-selected:hover {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+/* Dropdown */
+.select-options {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 200;
+}
+
+/* Show dropdown */
+.custom-select.open .select-options {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Options */
+.select-options div {
+    padding: 8px 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+    .select-options div:hover {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+    }
+
+    /* Active option */
+    .select-options div.active {
+        color: var(--accent);
+    }
